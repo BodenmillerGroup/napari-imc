@@ -29,7 +29,7 @@ setup(
     author='Jonas Windhager',
     author_email='jonas.windhager@uzh.ch',
     license='MIT',
-    url='https://github.com/jwindhager/napari-imc',
+    url='https://github.com/BodenmillerGroup/napari-imc',
     description='Imaging Mass Cytometry (IMC) file type support for napari',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',

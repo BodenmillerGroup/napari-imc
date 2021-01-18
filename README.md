@@ -3,8 +3,8 @@
 [![License](https://img.shields.io/pypi/l/napari-imc.svg?color=green)](https://github.com/napari/napari-imc/raw/master/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/napari-imc.svg?color=green)](https://pypi.org/project/napari-imc)
 [![Python Version](https://img.shields.io/pypi/pyversions/napari-imc.svg?color=green)](https://python.org)
-[![tests](https://github.com/jwindhager/napari-imc/workflows/tests/badge.svg)](https://github.com/jwindhager/napari-imc/actions)
-[![codecov](https://codecov.io/gh/jwindhager/napari-imc/branch/master/graph/badge.svg)](https://codecov.io/gh/jwindhager/napari-imc)
+[![tests](https://github.com/BodenmillerGroup/napari-imc/workflows/tests/badge.svg)](https://github.com/BodenmillerGroup/napari-imc/actions)
+[![codecov](https://codecov.io/gh/BodenmillerGroup/napari-imc/branch/master/graph/badge.svg)](https://codecov.io/gh/BodenmillerGroup/napari-imc)
 
 Imaging Mass Cytometry (IMC) file type support for napari
 
@@ -50,7 +50,7 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 [Apache Software License 2.0]: http://www.apache.org/licenses/LICENSE-2.0
 [Mozilla Public License 2.0]: https://www.mozilla.org/media/MPL/2.0/index.txt
 [cookiecutter-napari-plugin]: https://github.com/napari/cookiecutter-napari-plugin
-[file an issue]: https://github.com/jwindhager/napari-imc/issues
+[file an issue]: https://github.com/BodenmillerGroup/napari-imc/issues
 [napari]: https://github.com/napari/napari
 [tox]: https://tox.readthedocs.io/en/latest/
 [pip]: https://pypi.org/project/pip/
