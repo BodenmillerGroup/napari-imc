@@ -1,79 +1,104 @@
-"""
-This module is an example of a barebones numpy reader plugin for napari.
-
-It implements the ``napari_get_reader`` hook specification, (to create
-a reader plugin) but your plugin may choose to implement any of the hook
-specifications offered by napari.
-see: https://napari.org/docs/plugins/hook_specifications.html
-
-Replace code below accordingly.  For complete documentation see:
-https://napari.org/docs/plugins/for_plugin_developers.html
-"""
-import numpy as np
+from imageio import imread
+from imctools.io.mcd.mcdparser import McdParser
+from imctools.io.txt.txtparser import TxtParser
 from napari_plugin_engine import napari_hook_implementation
+from pathlib import Path
+
+from .mcd_dialog import MCDDialog
 
 
 @napari_hook_implementation
 def napari_get_reader(path):
-    """A basic implementation of the napari_get_reader hook specification.
-
-    Parameters
-    ----------
-    path : str or list of str
-        Path to file, or list of paths.
-
-    Returns
-    -------
-    function or None
-        If the path is a recognized format, return a function that accepts the
-        same path or list of paths, and returns a list of layer data tuples.
-    """
     if isinstance(path, list):
-        # reader plugins may be handed single path, or a list of paths.
-        # if it is a list, it is assumed to be an image stack...
-        # so we are only going to look at the first file.
-        path = path[0]
-
-    # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".npy"):
-        return None
-
-    # otherwise we return the *function* that can read ``path``.
-    return reader_function
+        for p in path:
+            suffix = Path(p).suffix.lower()
+            if suffix != '.mcd' and suffix != '.txt':
+                return None
+        return read_imc
+    suffix = Path(path).suffix.lower()
+    if suffix == '.mcd' or suffix == '.txt':
+        return read_imc
+    return None
 
 
-def reader_function(path):
-    """Take a path or list of paths and return a list of LayerData tuples.
+def read_imc(path):
+    if isinstance(path, list):
+        layer_data = []
+        for p in path:
+            layer_data += read_imc(p)
+        return layer_data
+    path = Path(path)
+    suffix = path.suffix.lower()
+    if suffix == '.mcd':
+        return _read_mcd(path)
+    if suffix == '.txt':
+        return _read_txt(path)
+    return None
 
-    Readers are expected to return data as a list of tuples, where each tuple
-    is (data, [add_kwargs, [layer_type]]), "add_kwargs" and "layer_type" are
-    both optional.
 
-    Parameters
-    ----------
-    path : str or list of str
-        Path to file, or list of paths.
+def _read_mcd(path):
+    layer_data = []
+    with McdParser(path) as parser:
+        panoramas = [p for p in parser.session.panoramas.values() if p.image_type != 'Default']
+        acquisitions = [a for a in parser.session.acquisitions.values() if a.is_valid]
+        dialog = MCDDialog(panoramas, acquisitions)
+        if dialog.exec() == MCDDialog.Accepted:
+            for panorama in dialog.selected_panoramas:
+                panorama_data = parser.get_panorama_image(panorama.id)
+                layer_data.append(_load_panorama(panorama, panorama_data))
+            for acquisition in dialog.selected_acquisitions:
+                acquisition_data = parser.get_acquisition_data(acquisition.id)
+                layer_data.append(_load_acquisition(acquisition, acquisition_data, show_id=True))
+    return layer_data[::-1]
 
-    Returns
-    -------
-    layer_data : list of tuples
-        A list of LayerData tuples where each tuple in the list contains
-        (data, metadata, layer_type), where data is a numpy array, metadata is
-        a dict of keyword arguments for the corresponding viewer.add_* method
-        in napari, and layer_type is a lower-case string naming the type of layer.
-        Both "meta", and "layer_type" are optional. napari will default to
-        layer_type=="image" if not provided
-    """
-    # handle both a string and a list of strings
-    paths = [path] if isinstance(path, str) else path
-    # load all files into array
-    arrays = [np.load(_path) for _path in paths]
-    # stack arrays into single array
-    data = np.squeeze(np.stack(arrays))
 
-    # optional kwargs for the corresponding viewer.add_* method
-    # https://napari.org/docs/api/napari.components.html#module-napari.components.add_layers_mixin
-    add_kwargs = {}
+def _read_txt(path):
+    with TxtParser(path) as parser:
+        acquisition_data = parser.get_acquisition_data()
+        acquisition = acquisition_data.acquisition
+        return [_load_acquisition(acquisition, acquisition_data, fallback_name=path.name)]
 
-    layer_type = "image"  # optional, default is "image"
-    return [(data, add_kwargs, layer_type)]
+
+def _load_panorama(panorama, panorama_data):
+    xs_physical = [panorama.x1, panorama.x2, panorama.x3, panorama.x4]
+    ys_physical = [panorama.y1, panorama.y2, panorama.y3, panorama.y4]
+    x_physical, y_physical = min(xs_physical), min(ys_physical)
+    w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
+    data = imread(panorama_data)
+    if x_physical != panorama.x1:
+        data = data[:, ::-1, :]
+    if y_physical != panorama.y1:
+        data = data[::-1, :, :]
+    metadata = {
+        'name': f'[P{panorama.id:02d}] {panorama.description}',
+        'scale': (h_physical / data.shape[0], w_physical / data.shape[1]),
+        'translate': (y_physical, x_physical),
+    }
+    return data, metadata, 'image'
+
+
+def _load_acquisition(acquisition, acquisition_data, fallback_name=None, show_id=False):
+    x_physical, y_physical = 0, 0
+    w_physical, h_physical = acquisition.max_x, acquisition.max_y
+    xs_physical = [acquisition.roi_start_x_pos_um, acquisition.roi_end_x_pos_um]
+    ys_physical = [acquisition.roi_start_y_pos_um, acquisition.roi_end_y_pos_um]
+    if None not in xs_physical and None not in ys_physical:
+        x_physical, y_physical = min(xs_physical), min(ys_physical, default=0)
+        w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
+    data = acquisition_data.image_data
+    if x_physical != acquisition.roi_start_x_pos_um and acquisition.roi_start_x_pos_um is not None:
+        data = data[:, :, ::-1]
+    if y_physical != acquisition.roi_start_y_pos_um and acquisition.roi_start_y_pos_um is not None:
+        data = data[:, ::-1, :]
+    acquisition_id_str = f'{acquisition.id:02d}' if show_id else ''
+    metadata = {
+        'channel_axis': 0,
+        'name': [
+            f'[A{acquisition_id_str}] {channel_label} ({acquisition.description or fallback_name})'
+            for channel_label in acquisition.channel_labels
+        ],
+        'scale': (h_physical / data.shape[1], w_physical / data.shape[2]),
+        'translate': (y_physical, x_physical),
+        'visible': False,
+    }
+    return data, metadata, 'image'

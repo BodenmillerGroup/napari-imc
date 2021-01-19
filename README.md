@@ -1,10 +1,10 @@
 # napari-imc
 
-[![License](https://img.shields.io/pypi/l/napari-imc.svg?color=green)](https://github.com/napari/napari-imc/raw/master/LICENSE)
+[![License](https://img.shields.io/pypi/l/napari-imc.svg?color=green)](https://github.com/BodenmillerGroup/napari-imc/raw/master/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/napari-imc.svg?color=green)](https://pypi.org/project/napari-imc)
 [![Python Version](https://img.shields.io/pypi/pyversions/napari-imc.svg?color=green)](https://python.org)
-[![tests](https://github.com/BodenmillerGroup/napari-imc/workflows/tests/badge.svg)](https://github.com/BodenmillerGroup/napari-imc/actions)
-[![codecov](https://codecov.io/gh/BodenmillerGroup/napari-imc/branch/master/graph/badge.svg)](https://codecov.io/gh/BodenmillerGroup/napari-imc)
+<!-- [![tests](https://github.com/BodenmillerGroup/napari-imc/workflows/tests/badge.svg)](https://github.com/BodenmillerGroup/napari-imc/actions) -->
+<!-- [![codecov](https://codecov.io/gh/BodenmillerGroup/napari-imc/branch/master/graph/badge.svg)](https://codecov.io/gh/BodenmillerGroup/napari-imc) -->
 
 Imaging Mass Cytometry (IMC) file type support for napari
 
