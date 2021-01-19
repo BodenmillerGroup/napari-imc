@@ -43,12 +43,12 @@ def _read_mcd(path):
         acquisitions = [a for a in parser.session.acquisitions.values() if a.is_valid]
         dialog = MCDDialog(panoramas, acquisitions)
         if dialog.exec() == MCDDialog.Accepted:
-            for panorama in dialog.selected_panoramas:
-                panorama_data = parser.get_panorama_image(panorama.id)
-                layer_data.append(_load_panorama(panorama, panorama_data))
             for acquisition in dialog.selected_acquisitions:
                 acquisition_data = parser.get_acquisition_data(acquisition.id)
                 layer_data.append(_load_acquisition(acquisition, acquisition_data, show_id=True))
+            for panorama in dialog.selected_panoramas:
+                panorama_data = parser.get_panorama_image(panorama.id)
+                layer_data.append(_load_panorama(panorama, panorama_data))
     return layer_data[::-1]
 
 
