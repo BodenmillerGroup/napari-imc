@@ -110,13 +110,13 @@ class MCDDialog(QDialog):
     @property
     def selected_panoramas(self) -> Sequence[Panorama]:
         return [
-            item.panorama for i in range(self.panorama_list_widget.count())
-            if (item := self.panorama_list_widget.item(i)).checkState() == Qt.Checked
+            self.panorama_list_widget.item(i).panorama for i in range(self.panorama_list_widget.count())
+            if self.panorama_list_widget.item(i).checkState() == Qt.Checked
         ]
 
     @property
     def selected_acquisitions(self) -> Sequence[Acquisition]:
         return [
-            item.acquisition for i in range(self.acquisition_list_widget.count())
-            if (item := self.acquisition_list_widget.item(i)).checkState() == Qt.Checked
+            self.acquisition_list_widget.item(i).acquisition for i in range(self.acquisition_list_widget.count())
+            if self.acquisition_list_widget.item(i).checkState() == Qt.Checked
         ]
