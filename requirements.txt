@@ -1,5 +1,5 @@
+napari
 napari-plugin-engine>=0.1.4
-numpy
 imageio
-imctools
+imctools>=2.1.1
 qtpy
