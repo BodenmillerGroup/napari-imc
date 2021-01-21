@@ -1,4 +1,4 @@
-from qtpy.QtCore import Qt, QModelIndex
+from qtpy.QtCore import QModelIndex
 from qtpy.QtWidgets import QTableView
 
 
