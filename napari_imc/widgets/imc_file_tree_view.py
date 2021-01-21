@@ -5,7 +5,6 @@ from qtpy.QtWidgets import QTreeView
 class IMCFileTreeView(QTreeView):
     def __init__(self, parent=None):
         super(IMCFileTreeView, self).__init__(parent)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def rowsInserted(self, parent: QModelIndex, first: int, last: int):
         super(IMCFileTreeView, self).rowsInserted(parent, first, last)

@@ -7,7 +7,6 @@ class IMCChannelTableView(QTableView):
         super(IMCChannelTableView, self).__init__(parent)
         self.horizontalHeader().setStretchLastSection(True)
         self.setSelectionBehavior(QTableView.SelectRows)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setShowGrid(False)
 
     def rowsInserted(self, parent: QModelIndex, first: int, last: int):
