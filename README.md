@@ -23,8 +23,30 @@ https://napari.org/docs/plugins/index.html
 ## Installation
 
 You can install `napari-imc` via [pip]:
+```shell
+pip install napari-imc
+```
 
-    pip install napari-imc
+## Usage
+
+To start `napari-imc` from command line:
+
+```shell
+napari-imc
+```
+
+For code usage from within Python:
+
+```python
+import napari
+
+from napari_imc import IMCController
+
+with napari.gui_qt():
+    viewer = napari.Viewer(title='napari [IMC]')
+    controller = IMCController(viewer)
+    controller.initialize()
+```
 
 ## Contributing
 

@@ -1,205 +1,146 @@
-import napari
-
-from imageio import imread
-from imctools.io.mcd.mcdparser import McdParser
-from imctools.io.txt.txtparser import TxtParser
 from pathlib import Path
-from qtpy.QtCore import Qt, QItemSelection, QModelIndex, QSortFilterProxyModel
-from qtpy.QtWidgets import QFileDialog, QPushButton, QVBoxLayout, QSplitter, QWidget
-from typing import Optional
+from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel, QModelIndex, QSortFilterProxyModel
+from qtpy.QtWidgets import QFileDialog, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QVBoxLayout, QWidget
+from typing import Optional, TYPE_CHECKING
 
-from napari_imc.widgets import IMCChannelControlsWidget, IMCChannelTableView, IMCFileTreeView
-from napari_imc.widgets.models import IMCChannelTableModel, IMCFileTreeModel
-from napari_imc.widgets.utils import create_imc_acquisition_colormap
+from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
+from napari_imc.widgets.channel_controls_widget import ChannelControlsWidget
+from napari_imc.widgets.channel_table_model import ChannelTableModel
+from napari_imc.widgets.channel_table_view import ChannelTableView
+from napari_imc.widgets.imc_file_tree_model import IMCFileTreeModel
+from napari_imc.widgets.imc_file_tree_view import IMCFileTreeView
+
+if TYPE_CHECKING:
+    from napari_imc import IMCController
 
 
 class IMCWidget(QWidget):
-    def __init__(self, parent=None):
-        super(IMCWidget, self).__init__(parent)
+    def __init__(self, controller: 'IMCController'):
+        # noinspection PyArgumentList
+        super(IMCWidget, self).__init__()
+        self._controller = controller
 
-        self.open_imc_file_button = QPushButton('Open IMC file', self)
-        # noinspection PyUnresolvedReferences
-        self.open_imc_file_button.clicked.connect(self.on_open_imc_file_button_clicked)
+        self._open_imc_file_button = QPushButton('Open IMC file', self)
 
-        self.imc_file_tree_model = IMCFileTreeModel(self)
-        # noinspection PyUnresolvedReferences
-        self.imc_file_tree_model.dataChanged.connect(self.on_imc_file_tree_model_data_changed)
-        self.imc_file_tree_view = IMCFileTreeView(self)
-        self.imc_file_tree_view.setModel(self.imc_file_tree_model)
+        self._imc_file_tree_model = IMCFileTreeModel(controller, parent=self)
+        self._imc_file_tree_view = IMCFileTreeView(parent=self)
+        self._imc_file_tree_view.setModel(self._imc_file_tree_model)
 
-        self.imc_channel_table_model = IMCChannelTableModel(self)
-        # noinspection PyUnresolvedReferences
-        self.imc_channel_table_model.dataChanged.connect(self.on_imc_channel_table_model_data_changed)
-        self.imc_channel_table_proxy_model = QSortFilterProxyModel(self)
-        self.imc_channel_table_proxy_model.setSourceModel(self.imc_channel_table_model)
-        self.imc_channel_table_proxy_model.sort(self.imc_channel_table_model.label_column)
-        self.imc_channel_table_view = IMCChannelTableView(self)
-        self.imc_channel_table_view.setModel(self.imc_channel_table_proxy_model)
-        imc_channel_table_selection_model = self.imc_channel_table_view.selectionModel()
-        # noinspection PyUnresolvedReferences
-        imc_channel_table_selection_model.selectionChanged.connect(self.on_imc_channel_table_view_selection_changed)
+        self._channel_table_model = ChannelTableModel(controller, parent=self)
+        self._channel_table_proxy_model = QSortFilterProxyModel(self)
+        self._channel_table_proxy_model.setSourceModel(self._channel_table_model)
+        self._channel_table_proxy_model.sort(self._channel_table_model.label_column)
+        self._channel_table_view = ChannelTableView(parent=self)
+        self._channel_table_view.setModel(self._channel_table_proxy_model)
 
-        self.imc_channel_controls_widget = IMCChannelControlsWidget(self)
+        self._channel_controls_widget = ChannelControlsWidget(controller, parent=self)
+        self._channel_controls_container = QStackedWidget(self)
+        self._channel_controls_container.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self._channel_controls_container.addWidget(QWidget(self))
+        self._channel_controls_container.addWidget(self._channel_controls_widget)
 
         layout = QVBoxLayout(self)
         splitter = QSplitter(Qt.Vertical, self)
-        imc_file_widget = QWidget(self)
-        imc_file_widget_layout = QVBoxLayout(imc_file_widget)
-        imc_file_widget_layout.addWidget(self.open_imc_file_button)
-        imc_file_widget_layout.addWidget(self.imc_file_tree_view)
-        imc_file_widget.setLayout(imc_file_widget_layout)
-        splitter.addWidget(imc_file_widget)
-        splitter.setStretchFactor(0, 1)
-        imc_channel_widget = QWidget(self)
-        imc_channel_widget_layout = QVBoxLayout(imc_channel_widget)
-        imc_channel_widget_layout.addWidget(self.imc_channel_table_view)
-        imc_channel_widget_layout.addWidget(self.imc_channel_controls_widget)
-        imc_channel_widget.setLayout(imc_channel_widget_layout)
-        splitter.addWidget(imc_channel_widget)
-        splitter.setStretchFactor(1, 3)
+        # noinspection PyArgumentList
+        imc_file_panel = QWidget(self)
+        imc_file_panel_layout = QVBoxLayout(imc_file_panel)
+        # noinspection PyArgumentList
+        imc_file_panel_layout.addWidget(self._open_imc_file_button)
+        # noinspection PyArgumentList
+        imc_file_panel_layout.addWidget(self._imc_file_tree_view)
+        imc_file_panel.setLayout(imc_file_panel_layout)
+        splitter.addWidget(imc_file_panel)
+        # noinspection PyArgumentList
+        channel_panel = QWidget(self)
+        channel_panel_layout = QVBoxLayout(channel_panel)
+        # noinspection PyArgumentList
+        channel_panel_layout.addWidget(self._channel_table_view)
+        # noinspection PyArgumentList
+        channel_panel_layout.addWidget(self._channel_controls_container)
+        channel_panel.setLayout(channel_panel_layout)
+        splitter.addWidget(channel_panel)
+        # noinspection PyArgumentList
         layout.addWidget(splitter)
         self.setLayout(layout)
 
-    def on_open_imc_file_button_clicked(self, checked: bool = False):
-        files, _ = QFileDialog.getOpenFileNames(parent=self, filter='Imaging mass cytometry files (*.txt *.mcd)')
-        for file in files:
-            path = Path(file)
-            if path.suffix.lower() == '.mcd':
-                with McdParser(path) as parser:
-                    panoramas = [p for p in parser.session.panoramas.values() if p.image_type != 'Default']
-                    acquisitions = [a for a in parser.session.acquisitions.values() if a.is_valid]
-                    self.imc_file_tree_model.add_imc_file(path, panoramas, acquisitions)
-            elif path.suffix.lower() == '.txt':
-                with TxtParser(path) as parser:
-                    acquisition_data = parser.get_acquisition_data()
-                    self.imc_file_tree_model.add_imc_file(path, [], [acquisition_data.acquisition])
+        channel_table_selection_model: QItemSelectionModel = self._channel_table_view.selectionModel()
+        # noinspection PyUnresolvedReferences
+        self._open_imc_file_button.clicked.connect(self._on_open_imc_file_button_clicked)
+        # noinspection PyUnresolvedReferences
+        self._imc_file_tree_model.dataChanged.connect(self._on_imc_file_tree_model_data_changed)
+        # noinspection PyUnresolvedReferences
+        self._imc_file_tree_view.events.imc_file_closed.connect(self._on_imc_file_tree_view_imc_file_closed)
+        # noinspection PyUnresolvedReferences
+        self._channel_table_model.dataChanged.connect(self._on_channel_table_model_data_changed)
+        # noinspection PyUnresolvedReferences
+        channel_table_selection_model.selectionChanged.connect(self._on_channel_table_view_selection_changed)
 
-    def on_imc_file_tree_model_data_changed(self, top_left: QModelIndex, bottom_right: QModelIndex,
-                                            roles: Optional[int] = None):
-        item = top_left.internalPointer()
-        if isinstance(item, IMCFileTreeModel.PanoramaItem):
-            if item.checked:
-                self.add_panorama_layer(item.imc_file_item.path, item.panorama.id)
-            else:
-                self.remove_panorama_layer(item.imc_file_item.path, item.panorama.id)
-        elif isinstance(item, IMCFileTreeModel.AcquisitionItem):
-            path = item.imc_file_item.path
-            if item.checked:
-                for channel in self.imc_channel_table_model.add_acquisition(path, item.acquisition):
-                    self.add_acquisition_layer(path, item.acquisition.id, channel.label)
-            else:
-                for channel in self.imc_channel_table_model.remove_acquisition(path, item.acquisition):
-                    self.remove_acquisition_layer(path, item.acquisition.id, channel.label)
+    def select_channel(self, channel_index: int):
+        top_left = self._channel_table_model.index(channel_index, 0)
+        top_left = self._channel_table_proxy_model.mapFromSource(top_left)
+        bottom_right = self._channel_table_model.index(channel_index, self._channel_table_model.columnCount() - 1)
+        bottom_right = self._channel_table_proxy_model.mapFromSource(bottom_right)
+        selection_model: QItemSelectionModel = self._channel_table_view.selectionModel()
+        selection_model.clearSelection()  # first clear the selection, to make sure the channel controls refresh
+        selection_model.select(QItemSelection(top_left, bottom_right), QItemSelectionModel.Select)
 
-    def on_imc_channel_table_model_data_changed(self, top_left: QModelIndex, bottom_right: QModelIndex,
-                                                roles: Optional[int] = None):
-        item = self.imc_channel_table_model.items[top_left.row()]
-        if item.checked:
-            for path, acquisition_id in item.shown_acquisitions:
-                self.add_acquisition_layer(path, acquisition_id, item.channel_label)
+    def refresh_channel_controls_widget(self):
+        self._channel_controls_widget.refresh()
+        if len(self._controller.selected_channels) > 0:
+            self._channel_controls_container.setCurrentIndex(1)
         else:
-            for path, acquisition_id in item.shown_acquisitions:
-                self.remove_acquisition_layer(path, acquisition_id, item.channel_label)
-        self.refresh_imc_channel_controls_widget()
-
-    def on_imc_channel_table_view_selection_changed(self, selected: QItemSelection, deselected: QItemSelection):
-        self.refresh_imc_channel_controls_widget()
-
-    def add_panorama_layer(self, path: Path, panorama_id: int):
-        with McdParser(path) as parser:
-            panorama = parser.session.panoramas[panorama_id]
-            xs_physical = [panorama.x1, panorama.x2, panorama.x3, panorama.x4]
-            ys_physical = [panorama.y1, panorama.y2, panorama.y3, panorama.y4]
-            x_physical, y_physical = min(xs_physical), min(ys_physical)
-            w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
-            data = imread(parser.get_panorama_image(panorama.id))
-            if x_physical != panorama.x1:
-                data = data[:, ::-1, :]
-            if y_physical != panorama.y1:
-                data = data[::-1, :, :]
-        self.viewer.add_image(
-            data,
-            name=f'{path.name} [P{panorama.id:02d}]',
-            metadata={
-                'imc_panorama_layer': True,
-                'path': path,
-                'panorama_id': panorama_id
-            },
-            scale=(h_physical / data.shape[0], w_physical / data.shape[1]),
-            translate=(y_physical, x_physical),
-        )
-
-    def remove_panorama_layer(self, path: Path, panorama_id: int):
-        layers_to_remove = []
-        for layer in self.viewer.layers:
-            imc_panorama_layer = layer.metadata.get('imc_panorama_layer', False)
-            path_matching = (layer.metadata.get('path') == path)
-            panorama_id_matching = (layer.metadata.get('panorama_id') == panorama_id)
-            if imc_panorama_layer and path_matching and panorama_id_matching:
-                layers_to_remove.append(layer)
-        for layer in layers_to_remove:
-            self.viewer.layers.remove(layer)
-
-    def add_acquisition_layer(self, path: Path, acquisition_id: int, channel_label: str):
-        if path.suffix.lower() == '.mcd':
-            with McdParser(path) as parser:
-                acquisition = parser.session.acquisitions[acquisition_id]
-                xs_physical = [acquisition.roi_start_x_pos_um, acquisition.roi_end_x_pos_um]
-                ys_physical = [acquisition.roi_start_y_pos_um, acquisition.roi_end_y_pos_um]
-                x_physical, y_physical = min(xs_physical), min(ys_physical, default=0)
-                w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
-                data = parser.get_acquisition_data(acquisition.id).get_image_by_label(channel_label)
-                if x_physical != acquisition.roi_start_x_pos_um:
-                    data = data[:, ::-1]
-                if y_physical != acquisition.roi_start_y_pos_um:
-                    data = data[::-1, :]
-        elif path.suffix.lower() == '.txt':
-            with TxtParser(path) as parser:
-                acquisition_data = parser.get_acquisition_data()
-                acquisition = acquisition_data.acquisition
-                x_physical, y_physical = 0, 0
-                w_physical, h_physical = acquisition.max_x, acquisition.max_y
-                data = acquisition_data.get_image_by_label(channel_label)
-        self.viewer.add_image(
-            data,
-            colormap=create_imc_acquisition_colormap(1., 1., 1., 1.),
-            contrast_limits=(0, data.max()),  # sets contrast_limits_range
-            name=f'{path.name} [A{acquisition_id:02d} {channel_label}]',
-            metadata={
-                'imc_acquisition_layer': True,
-                'path': path,
-                'acquisition_id': acquisition_id,
-                'channel_label': channel_label
-            },
-            scale=(h_physical / data.shape[0], w_physical / data.shape[1]),
-            translate=(y_physical, x_physical),
-            blending='additive',
-        )
-
-    def remove_acquisition_layer(self, path: Path, acquisition_id: int, channel_label: str):
-        layers_to_remove = []
-        for layer in self.viewer.layers:
-            imc_acquisition_layer = layer.metadata.get('imc_acquisition_layer', False)
-            path_matching = (layer.metadata.get('path') == path)
-            acquisition_id_matching = (layer.metadata.get('acquisition_id') == acquisition_id)
-            channel_label_matching = (layer.metadata.get('channel_label') == channel_label)
-            if imc_acquisition_layer and path_matching and acquisition_id_matching and channel_label_matching:
-                layers_to_remove.append(layer)
-        for layer in layers_to_remove:
-            self.viewer.layers.remove(layer)
-
-    def refresh_imc_channel_controls_widget(self):
-        self.imc_channel_controls_widget.layers.clear()
-        for index in self.imc_channel_table_view.selectedIndexes():
-            index = self.imc_channel_table_proxy_model.mapToSource(index)
-            item = self.imc_channel_table_model.items[index.row()]
-            for layer in self.viewer.layers:
-                imc_acquisition_layer = layer.metadata.get('imc_acquisition_layer', False)
-                channel_label_matching = (layer.metadata.get('channel_label') == item.channel_label)
-                if imc_acquisition_layer and channel_label_matching:
-                    self.imc_channel_controls_widget.layers.append(layer)
-        self.imc_channel_controls_widget.refresh()
+            self._channel_controls_container.setCurrentIndex(0)
 
     @property
-    def viewer(self) -> napari.Viewer:
-        return self.parent().qt_viewer.viewer
+    def imc_file_tree_model(self):
+        return self._imc_file_tree_model
+
+    @property
+    def channel_table_model(self):
+        return self._channel_table_model
+
+    # noinspection PyUnusedLocal
+    def _on_open_imc_file_button_clicked(self, checked: bool = False):
+        # noinspection PyArgumentList
+        imc_file_paths, _ = QFileDialog.getOpenFileNames(self, filter='Imaging mass cytometry files (*.txt *.mcd)')
+        open_imc_file_paths = [imc_file.path for imc_file in self._controller.imc_files]
+        for imc_file_path in imc_file_paths:
+            imc_file_path = Path(imc_file_path)
+            if imc_file_path not in open_imc_file_paths:
+                self._controller.open_imc_file(imc_file_path)
+
+    # noinspection PyUnusedLocal
+    def _on_imc_file_tree_model_data_changed(self, top_left: QModelIndex, bottom_right: QModelIndex,
+                                             roles: Optional[int] = None):
+        item = top_left.internalPointer()
+        if isinstance(item, IMCFilePanoramaModel):
+            if item.is_shown:
+                self._controller.hide_imc_file_panorama(item)
+            else:
+                self._controller.show_imc_file_panorama(item)
+        elif isinstance(item, IMCFileAcquisitionModel):
+            if item.is_loaded:
+                self._controller.unload_imc_file_acquisition(item)
+            else:
+                self._controller.load_imc_file_acquisition(item)
+
+    def _on_imc_file_tree_view_imc_file_closed(self, imc_file: IMCFileModel):
+        self._controller.close_imc_file(imc_file)
+
+    # noinspection PyUnusedLocal
+    def _on_channel_table_model_data_changed(self, top_left: QModelIndex, bottom_right: QModelIndex,
+                                             roles: Optional[int] = None):
+        channel = self._controller.channels[top_left.row()]
+        if channel.is_shown:
+            self._controller.hide_channel(channel)
+        else:
+            self._controller.show_channel(channel)
+
+    # noinspection PyUnusedLocal
+    def _on_channel_table_view_selection_changed(self, selected: QItemSelection, deselected: QItemSelection):
+        selected_channels = []
+        for index in self._channel_table_view.selectedIndexes():
+            index = self._channel_table_proxy_model.mapToSource(index)
+            channel = self._controller.channels[index.row()]
+            selected_channels.append(channel)
+        self._controller.selected_channels = selected_channels

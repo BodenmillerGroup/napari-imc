@@ -1,13 +1,14 @@
 import napari
 import sys
 
-from napari_imc.widgets import IMCWidget
+from napari_imc import IMCController
 
 
 def main():
     with napari.gui_qt():
         viewer = napari.Viewer(title='napari [IMC]')
-        viewer.window.add_dock_widget(IMCWidget(), name='Imaging mass cytometry', area='right')
+        controller = IMCController(viewer)
+        controller.initialize()
 
 
 if __name__ == '__main__':

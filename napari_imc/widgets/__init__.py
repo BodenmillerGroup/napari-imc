@@ -1,13 +1,15 @@
-from napari_imc.widgets.color_picker import ColorPicker
-from napari_imc.widgets.imc_channel_controls_widget import IMCChannelControlsWidget
-from napari_imc.widgets.imc_channel_table_view import IMCChannelTableView
+from napari_imc.widgets.channel_controls_widget import ChannelControlsWidget
+from napari_imc.widgets.channel_table_model import ChannelTableModel
+from napari_imc.widgets.channel_table_view import ChannelTableView
+from napari_imc.widgets.imc_file_tree_model import IMCFileTreeModel
 from napari_imc.widgets.imc_file_tree_view import IMCFileTreeView
 from napari_imc.widgets.imc_widget import IMCWidget
 
 __all__ = [
-    'ColorPicker',
-    'IMCChannelControlsWidget',
-    'IMCChannelTableView',
+    'ChannelControlsWidget',
+    'ChannelTableModel',
+    'ChannelTableView',
+    'IMCFileTreeModel',
     'IMCFileTreeView',
     'IMCWidget',
 ]
