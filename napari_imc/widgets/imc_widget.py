@@ -15,12 +15,13 @@ if TYPE_CHECKING:
 
 
 class IMCWidget(QWidget):
-    def __init__(self, controller: 'IMCController'):
+    def __init__(self, controller: 'IMCController', show_open_imc_file_button: bool = True):
         # noinspection PyArgumentList
         super(IMCWidget, self).__init__()
         self._controller = controller
 
-        self._open_imc_file_button = QPushButton('Open IMC file', self)
+        if show_open_imc_file_button:
+            self._open_imc_file_button = QPushButton('Open IMC file', self)
 
         self._imc_file_tree_model = IMCFileTreeModel(controller, parent=self)
         self._imc_file_tree_view = IMCFileTreeView(parent=self)
@@ -44,8 +45,9 @@ class IMCWidget(QWidget):
         # noinspection PyArgumentList
         imc_file_panel = QWidget(self)
         imc_file_panel_layout = QVBoxLayout(imc_file_panel)
-        # noinspection PyArgumentList
-        imc_file_panel_layout.addWidget(self._open_imc_file_button)
+        if show_open_imc_file_button:
+            # noinspection PyArgumentList
+            imc_file_panel_layout.addWidget(self._open_imc_file_button)
         # noinspection PyArgumentList
         imc_file_panel_layout.addWidget(self._imc_file_tree_view)
         imc_file_panel.setLayout(imc_file_panel_layout)
@@ -64,8 +66,9 @@ class IMCWidget(QWidget):
         self.setLayout(layout)
 
         channel_table_selection_model: QItemSelectionModel = self._channel_table_view.selectionModel()
-        # noinspection PyUnresolvedReferences
-        self._open_imc_file_button.clicked.connect(self._on_open_imc_file_button_clicked)
+        if show_open_imc_file_button:
+            # noinspection PyUnresolvedReferences
+            self._open_imc_file_button.clicked.connect(self._on_open_imc_file_button_clicked)
         # noinspection PyUnresolvedReferences
         self._imc_file_tree_model.dataChanged.connect(self._on_imc_file_tree_model_data_changed)
         # noinspection PyUnresolvedReferences
@@ -103,11 +106,8 @@ class IMCWidget(QWidget):
     def _on_open_imc_file_button_clicked(self, checked: bool = False):
         # noinspection PyArgumentList
         imc_file_paths, _ = QFileDialog.getOpenFileNames(self, filter='Imaging mass cytometry files (*.txt *.mcd)')
-        open_imc_file_paths = [imc_file.path for imc_file in self._controller.imc_files]
         for imc_file_path in imc_file_paths:
-            imc_file_path = Path(imc_file_path)
-            if imc_file_path not in open_imc_file_paths:
-                self._controller.open_imc_file(imc_file_path)
+            self._controller.open_imc_file(imc_file_path)
 
     # noinspection PyUnusedLocal
     def _on_imc_file_tree_model_data_changed(self, top_left: QModelIndex, bottom_right: QModelIndex,

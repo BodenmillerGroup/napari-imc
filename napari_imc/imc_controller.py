@@ -4,7 +4,7 @@ from imageio import imread
 from imctools.io.mcd.mcdparser import McdParser
 from imctools.io.txt.txtparser import TxtParser
 from pathlib import Path
-from typing import Any, List, Optional, Sequence, Tuple
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
 from napari_imc.models import ChannelModel, IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
 from napari_imc.models.base import IMCFileTreeItem
@@ -28,7 +28,11 @@ class IMCController(IMCFileTreeItem):
         self._widget = IMCWidget(self)
         self._viewer.window.add_dock_widget(self._widget, name='Imaging mass cytometry', area='right')
 
-    def open_imc_file(self, imc_file_path: Path) -> IMCFileModel:
+    def open_imc_file(self, imc_file_path: Union[str, Path]) -> IMCFileModel:
+        imc_file_path = Path(imc_file_path).resolve()
+        for imc_file in self.imc_files:
+            if imc_file.path.samefile(imc_file_path):
+                return imc_file
         if imc_file_path.suffix.lower() == '.mcd':
             with McdParser(imc_file_path) as parser:
                 panoramas = [p for p in parser.session.panoramas.values() if p.image_type != 'Default']
