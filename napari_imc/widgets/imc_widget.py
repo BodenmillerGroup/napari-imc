@@ -1,4 +1,3 @@
-from pathlib import Path
 from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel, QModelIndex, QSortFilterProxyModel
 from qtpy.QtWidgets import QFileDialog, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QVBoxLayout, QWidget
 from typing import Optional, TYPE_CHECKING
@@ -15,9 +14,9 @@ if TYPE_CHECKING:
 
 
 class IMCWidget(QWidget):
-    def __init__(self, controller: 'IMCController', show_open_imc_file_button: bool = True):
+    def __init__(self, controller: 'IMCController', parent=None, show_open_imc_file_button: bool = True):
         # noinspection PyArgumentList
-        super(IMCWidget, self).__init__()
+        super(IMCWidget, self).__init__(parent)
         self._controller = controller
 
         if show_open_imc_file_button:
