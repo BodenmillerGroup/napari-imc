@@ -27,6 +27,8 @@ You can install `napari-imc` via [pip]:
 pip install napari-imc
 ```
 
+As napari is in active development, the use of virtual environments is strongly recommended.
+
 ## Usage
 
 To start `napari-imc` from command line:
