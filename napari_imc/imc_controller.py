@@ -24,8 +24,8 @@ class IMCController(IMCFileTreeItem):
         self._selected_channels: List[ChannelModel] = []
         self._closed_imc_files_qt_memory_hack: List[IMCFileModel] = []
 
-    def initialize(self):
-        self._widget = IMCWidget(self)
+    def initialize(self, show_open_imc_file_button: bool = True):
+        self._widget = IMCWidget(self, show_open_imc_file_button=show_open_imc_file_button)
         self._viewer.window.add_dock_widget(self._widget, name='Imaging mass cytometry', area='right')
 
     def open_imc_file(self, imc_file_path: Union[str, Path]) -> IMCFileModel:
