@@ -12,20 +12,19 @@ class IMCFileTreeView(QTreeView):
         super(IMCFileTreeView, self).__init__(parent)
         self.events = IMCFileTreeView.Events(self)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
-        # noinspection PyUnresolvedReferences
-        self.customContextMenuRequested.connect(self._on_custom_context_menu_requested)
 
-    def _on_custom_context_menu_requested(self, pos: QPoint):
-        index: QModelIndex = self.indexAt(pos)
-        if index.isValid():
-            item = index.internalPointer()
-            if isinstance(item, IMCFileModel):
-                menu = QMenu()
-                close_action_icon = self.window().style().standardIcon(QStyle.SP_DialogCloseButton, widget=self)
-                close_action = menu.addAction(close_action_icon, 'Close')
-                if menu.exec(self.mapToGlobal(pos)) == close_action:
-                    # noinspection PyUnresolvedReferences
-                    self.events.imc_file_closed.emit(item)
+        # noinspection PyUnresolvedReferences
+        @self.customContextMenuRequested.connect
+        def on_custom_context_menu_requested(pos: QPoint):
+            index: QModelIndex = self.indexAt(pos)
+            if index.isValid():
+                item = index.internalPointer()
+                if isinstance(item, IMCFileModel):
+                    menu = QMenu()
+                    close_action_icon = self.window().style().standardIcon(QStyle.SP_DialogCloseButton, widget=self)
+                    close_action = menu.addAction(close_action_icon, 'Close')
+                    if menu.exec(self.mapToGlobal(pos)) == close_action:
+                        self.events.imc_file_closed.emit(item)
 
     def rowsInserted(self, parent: QModelIndex, first: int, last: int):
         super(IMCFileTreeView, self).rowsInserted(parent, first, last)

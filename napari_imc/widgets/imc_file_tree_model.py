@@ -9,9 +9,9 @@ if TYPE_CHECKING:
 
 
 class IMCFileTreeModel(QAbstractItemModel):
-    check_column = 0
-    id_column = 1
-    description_column = 2
+    CHECK_COLUMN = 0
+    ID_COLUMN = 1
+    DESCRIPTION_COLUMN = 2
 
     def __init__(self, controller: 'IMCController', parent=None):
         super(IMCFileTreeModel, self).__init__(parent)
@@ -50,14 +50,14 @@ class IMCFileTreeModel(QAbstractItemModel):
     def data(self, index: QModelIndex, role: Optional[int] = None) -> Any:
         if index.isValid():
             item: IMCFileTreeItem = index.internalPointer()
-            if role == Qt.DisplayRole and (index.column() != self.check_column or not item.imc_file_tree_is_checkable):
+            if role == Qt.DisplayRole and (index.column() != self.CHECK_COLUMN or not item.imc_file_tree_is_checkable):
                 return item.imc_file_tree_data[index.column()]
-            if role == Qt.CheckStateRole and (index.column() == self.check_column and item.imc_file_tree_is_checkable):
+            if role == Qt.CheckStateRole and (index.column() == self.CHECK_COLUMN and item.imc_file_tree_is_checkable):
                 return Qt.Checked if item.imc_file_tree_is_checked else Qt.Unchecked
         return None
 
     def setData(self, index: QModelIndex, value: Any, role: Optional[int] = None) -> bool:
-        if index.isValid() and role == Qt.CheckStateRole and index.column() == self.check_column:
+        if index.isValid() and role == Qt.CheckStateRole and index.column() == self.CHECK_COLUMN:
             item: IMCFileTreeItem = index.internalPointer()
             if item.imc_file_tree_is_checkable:
                 # imc_file_acquisition is set to loaded/unloaded in dataChanged event handler
@@ -72,17 +72,17 @@ class IMCFileTreeModel(QAbstractItemModel):
             return Qt.NoItemFlags
         flags = super(IMCFileTreeModel, self).flags(index)
         item: IMCFileTreeItem = index.internalPointer()
-        if index.column() == self.check_column and item.imc_file_tree_is_checkable:
+        if index.column() == self.CHECK_COLUMN and item.imc_file_tree_is_checkable:
             flags |= Qt.ItemIsUserCheckable
         return flags
 
     def headerData(self, section: int, orientation: int, role: Optional[int] = None) -> Any:
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            if section == self.check_column:
+            if section == self.CHECK_COLUMN:
                 return ''
-            if section == self.id_column:
+            if section == self.ID_COLUMN:
                 return 'ID'
-            if section == self.description_column:
+            if section == self.DESCRIPTION_COLUMN:
                 return 'Description'
         return None
 

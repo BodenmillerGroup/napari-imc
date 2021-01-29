@@ -18,23 +18,23 @@ class IMCFileModel(ModelBase, IMCFileTreeItem):
         self._imc_file_tree_acquisition_root_item = IMCFileModel.IMCFileTreeAcquisitionRootItem(self)
 
     @property
-    def path(self):
+    def path(self) -> Path:
         return self._path
 
     @property
-    def panoramas(self):
+    def panoramas(self) -> List[IMCFilePanoramaModel]:
         return self._panoramas
 
     @property
-    def acquisitions(self):
+    def acquisitions(self) -> List[IMCFileAcquisitionModel]:
         return self._acquisitions
 
     @property
-    def imc_file_tree_panorama_root_item(self):
+    def imc_file_tree_panorama_root_item(self) -> 'IMCFileModel.IMCFileTreePanoramaRootItem':
         return self._imc_file_tree_panorama_root_item
 
     @property
-    def imc_file_tree_acquisition_root_item(self):
+    def imc_file_tree_acquisition_root_item(self) -> 'IMCFileModel.IMCFileTreeAcquisitionRootItem':
         return self._imc_file_tree_acquisition_root_item
 
     @property

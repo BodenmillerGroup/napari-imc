@@ -16,32 +16,32 @@ class IMCFileAcquisitionModel(ModelBase, IMCFileTreeItem):
         self._imc_file = imc_file
         self._id = id_
         self._description = description
-        self._channel_labels = channel_labels
+        self._channel_labels = list(channel_labels)
         self._loaded_channels: List['ChannelModel'] = []
         self._is_loaded = False
 
     @property
-    def imc_file(self):
+    def imc_file(self) -> 'IMCFileModel':
         return self._imc_file
 
     @property
-    def id(self):
+    def id(self) -> int:
         return self._id
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._description
 
     @property
-    def channel_labels(self):
+    def channel_labels(self) -> List[str]:
         return self._channel_labels
 
     @property
-    def loaded_channels(self):
+    def loaded_channels(self) -> List['ChannelModel']:
         return self._loaded_channels
 
     @property
-    def is_loaded(self):
+    def is_loaded(self) -> bool:
         return self._is_loaded
 
     @property
@@ -53,7 +53,7 @@ class IMCFileAcquisitionModel(ModelBase, IMCFileTreeItem):
         return self._imc_file.imc_file_tree_acquisition_root_item
 
     @property
-    def _imc_file_tree_children(self) -> List['IMCFileTreeItem']:
+    def _imc_file_tree_children(self) -> List[IMCFileTreeItem]:
         return []
 
     @property

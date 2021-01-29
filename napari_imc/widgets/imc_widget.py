@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 class IMCWidget(QWidget):
     def __init__(self, controller: 'IMCController', parent=None, show_open_imc_file_button: bool = True):
-        # noinspection PyArgumentList
         super(IMCWidget, self).__init__(parent)
         self._controller = controller
 
@@ -29,7 +28,7 @@ class IMCWidget(QWidget):
         self._channel_table_model = ChannelTableModel(controller, parent=self)
         self._channel_table_proxy_model = QSortFilterProxyModel(self)
         self._channel_table_proxy_model.setSourceModel(self._channel_table_model)
-        self._channel_table_proxy_model.sort(self._channel_table_model.label_column)
+        self._channel_table_proxy_model.sort(self._channel_table_model.LABEL_COLUMN)
         self._channel_table_view = ChannelTableView(parent=self)
         self._channel_table_view.setModel(self._channel_table_proxy_model)
 
@@ -41,41 +40,76 @@ class IMCWidget(QWidget):
 
         layout = QVBoxLayout(self)
         splitter = QSplitter(Qt.Vertical, self)
-        # noinspection PyArgumentList
         imc_file_panel = QWidget(self)
         imc_file_panel_layout = QVBoxLayout(imc_file_panel)
         if show_open_imc_file_button:
-            # noinspection PyArgumentList
             imc_file_panel_layout.addWidget(self._open_imc_file_button)
-        # noinspection PyArgumentList
         imc_file_panel_layout.addWidget(self._imc_file_tree_view)
         imc_file_panel.setLayout(imc_file_panel_layout)
         splitter.addWidget(imc_file_panel)
-        # noinspection PyArgumentList
         channel_panel = QWidget(self)
         channel_panel_layout = QVBoxLayout(channel_panel)
-        # noinspection PyArgumentList
         channel_panel_layout.addWidget(self._channel_table_view)
-        # noinspection PyArgumentList
         channel_panel_layout.addWidget(self._channel_controls_container)
         channel_panel.setLayout(channel_panel_layout)
         splitter.addWidget(channel_panel)
-        # noinspection PyArgumentList
         layout.addWidget(splitter)
         self.setLayout(layout)
 
-        channel_table_selection_model: QItemSelectionModel = self._channel_table_view.selectionModel()
         if show_open_imc_file_button:
+            # noinspection PyUnusedLocal
             # noinspection PyUnresolvedReferences
-            self._open_imc_file_button.clicked.connect(self._on_open_imc_file_button_clicked)
+            @self._open_imc_file_button.clicked.connect
+            def on_open_imc_file_button_clicked(checked: bool = False):
+                imc_files, _ = QFileDialog.getOpenFileNames(self, filter='Imaging mass cytometry files (*.txt *.mcd)')
+                for imc_file in imc_files:
+                    self._controller.open_imc_file(imc_file)
+
+        # noinspection PyUnusedLocal
         # noinspection PyUnresolvedReferences
-        self._imc_file_tree_model.dataChanged.connect(self._on_imc_file_tree_model_data_changed)
+        @self._imc_file_tree_model.dataChanged.connect
+        def on_imc_file_tree_model_data_changed(top_left: QModelIndex, bottom_right: QModelIndex,
+                                                roles: Optional[int] = None):
+            item = top_left.internalPointer()
+            if isinstance(item, IMCFilePanoramaModel):
+                if item.is_shown:
+                    self._controller.hide_imc_file_panorama(item)
+                else:
+                    self._controller.show_imc_file_panorama(item)
+            elif isinstance(item, IMCFileAcquisitionModel):
+                if item.is_loaded:
+                    self._controller.unload_imc_file_acquisition(item)
+                else:
+                    self._controller.load_imc_file_acquisition(item)
+
         # noinspection PyUnresolvedReferences
-        self._imc_file_tree_view.events.imc_file_closed.connect(self._on_imc_file_tree_view_imc_file_closed)
+        @self._imc_file_tree_view.events.imc_file_closed.connect
+        def on_imc_file_tree_view_imc_file_closed(imc_file: IMCFileModel):
+            self._controller.close_imc_file(imc_file)
+
+        # noinspection PyUnusedLocal
         # noinspection PyUnresolvedReferences
-        self._channel_table_model.dataChanged.connect(self._on_channel_table_model_data_changed)
+        @self._channel_table_model.dataChanged.connect
+        def on_channel_table_model_data_changed(top_left: QModelIndex, bottom_right: QModelIndex,
+                                                roles: Optional[int] = None):
+            channel = self._controller.channels[top_left.row()]
+            if channel.is_shown:
+                self._controller.hide_channel(channel)
+            else:
+                self._controller.show_channel(channel)
+
+        channel_table_selection_model: QItemSelectionModel = self._channel_table_view.selectionModel()
+
+        # noinspection PyUnusedLocal
         # noinspection PyUnresolvedReferences
-        channel_table_selection_model.selectionChanged.connect(self._on_channel_table_view_selection_changed)
+        @channel_table_selection_model.selectionChanged.connect
+        def on_channel_table_view_selection_changed(selected: QItemSelection, deselected: QItemSelection):
+            selected_channels = []
+            for index in self._channel_table_view.selectedIndexes():
+                index = self._channel_table_proxy_model.mapToSource(index)
+                channel = self._controller.channels[index.row()]
+                selected_channels.append(channel)
+            self._controller.selected_channels = selected_channels
 
     def select_channel(self, channel_index: int):
         top_left = self._channel_table_model.index(channel_index, 0)
@@ -94,52 +128,9 @@ class IMCWidget(QWidget):
             self._channel_controls_container.setCurrentIndex(0)
 
     @property
-    def imc_file_tree_model(self):
+    def imc_file_tree_model(self) -> IMCFileTreeModel:
         return self._imc_file_tree_model
 
     @property
-    def channel_table_model(self):
+    def channel_table_model(self) -> ChannelTableModel:
         return self._channel_table_model
-
-    # noinspection PyUnusedLocal
-    def _on_open_imc_file_button_clicked(self, checked: bool = False):
-        # noinspection PyArgumentList
-        imc_file_paths, _ = QFileDialog.getOpenFileNames(self, filter='Imaging mass cytometry files (*.txt *.mcd)')
-        for imc_file_path in imc_file_paths:
-            self._controller.open_imc_file(imc_file_path)
-
-    # noinspection PyUnusedLocal
-    def _on_imc_file_tree_model_data_changed(self, top_left: QModelIndex, bottom_right: QModelIndex,
-                                             roles: Optional[int] = None):
-        item = top_left.internalPointer()
-        if isinstance(item, IMCFilePanoramaModel):
-            if item.is_shown:
-                self._controller.hide_imc_file_panorama(item)
-            else:
-                self._controller.show_imc_file_panorama(item)
-        elif isinstance(item, IMCFileAcquisitionModel):
-            if item.is_loaded:
-                self._controller.unload_imc_file_acquisition(item)
-            else:
-                self._controller.load_imc_file_acquisition(item)
-
-    def _on_imc_file_tree_view_imc_file_closed(self, imc_file: IMCFileModel):
-        self._controller.close_imc_file(imc_file)
-
-    # noinspection PyUnusedLocal
-    def _on_channel_table_model_data_changed(self, top_left: QModelIndex, bottom_right: QModelIndex,
-                                             roles: Optional[int] = None):
-        channel = self._controller.channels[top_left.row()]
-        if channel.is_shown:
-            self._controller.hide_channel(channel)
-        else:
-            self._controller.show_channel(channel)
-
-    # noinspection PyUnusedLocal
-    def _on_channel_table_view_selection_changed(self, selected: QItemSelection, deselected: QItemSelection):
-        selected_channels = []
-        for index in self._channel_table_view.selectedIndexes():
-            index = self._channel_table_proxy_model.mapToSource(index)
-            channel = self._controller.channels[index.row()]
-            selected_channels.append(channel)
-        self._controller.selected_channels = selected_channels

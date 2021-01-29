@@ -39,9 +39,9 @@ class ColorPicker(QPushButton):
         super(ColorPicker, self).update()
 
     @property
-    def color(self):
+    def color(self) -> QColor:
         return self._color_dialog.currentColor()
 
     @color.setter
-    def color(self, color):
+    def color(self, color: QColor):
         self._color_dialog.setCurrentColor(color)

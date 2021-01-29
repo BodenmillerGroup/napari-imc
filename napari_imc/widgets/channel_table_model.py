@@ -7,8 +7,8 @@ if TYPE_CHECKING:
 
 
 class ChannelTableModel(QAbstractTableModel):
-    check_column = 0
-    label_column = 1
+    CHECK_COLUMN = 0
+    LABEL_COLUMN = 1
 
     def __init__(self, controller: 'IMCController', parent=None):
         super(ChannelTableModel, self).__init__(parent)
@@ -23,14 +23,14 @@ class ChannelTableModel(QAbstractTableModel):
     def data(self, index: QModelIndex, role: Optional[int] = None) -> Any:
         if index.isValid():
             channel = self._controller.channels[index.row()]
-            if index.column() == self.check_column and role == Qt.CheckStateRole:
+            if index.column() == self.CHECK_COLUMN and role == Qt.CheckStateRole:
                 return Qt.Checked if channel.is_shown else Qt.Unchecked
-            if index.column() == self.label_column and role == Qt.DisplayRole:
+            if index.column() == self.LABEL_COLUMN and role == Qt.DisplayRole:
                 return channel.label
         return None
 
     def setData(self, index: QModelIndex, value: Any, role: Optional[int] = None) -> bool:
-        if index.isValid() and index.column() == self.check_column and role == Qt.CheckStateRole:
+        if index.isValid() and index.column() == self.CHECK_COLUMN and role == Qt.CheckStateRole:
             # channel is set to shown/hidden in dataChanged event handler
             # noinspection PyUnresolvedReferences
             self.dataChanged.emit(index, index, [Qt.CheckStateRole])
@@ -41,15 +41,15 @@ class ChannelTableModel(QAbstractTableModel):
         if not index.isValid():
             return Qt.NoItemFlags
         flags = super(ChannelTableModel, self).flags(index)
-        if index.column() == self.check_column:
+        if index.column() == self.CHECK_COLUMN:
             flags |= Qt.ItemIsUserCheckable
         return flags
 
     def headerData(self, section: int, orientation: int, role: Optional[int] = None) -> Any:
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            if section == self.check_column:
+            if section == self.CHECK_COLUMN:
                 return ''
-            if section == self.label_column:
+            if section == self.LABEL_COLUMN:
                 return 'Channel'
         return None
 

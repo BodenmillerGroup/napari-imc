@@ -3,7 +3,9 @@ import napari
 from imageio import imread
 from imctools.io.mcd.mcdparser import McdParser
 from imctools.io.txt.txtparser import TxtParser
+from napari.layers import Image
 from pathlib import Path
+from qtpy.QtWidgets import QDockWidget
 from typing import Any, List, Optional, Sequence, Tuple, Union
 
 from napari_imc.models import ChannelModel, IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
@@ -12,13 +14,14 @@ from napari_imc.widgets import IMCWidget
 
 
 class IMCController(IMCFileTreeItem):
-    panorama_layer_type = 'imc_panorama_layer'
-    acquisition_layer_type = 'imc_acquisition_layer'
+    PANORAMA_LAYER_TYPE = 'imc_panorama_layer'
+    ACQUISITION_LAYER_TYPE = 'imc_acquisition_layer'
 
     def __init__(self, viewer: napari.Viewer):
         super(IMCController, self).__init__()
         self._viewer = viewer
         self._widget: Optional[IMCWidget] = None
+        self._dock_widget: Optional[QDockWidget] = None
         self._imc_files: List[IMCFileModel] = []
         self._channels: List[ChannelModel] = []
         self._selected_channels: List[ChannelModel] = []
@@ -26,7 +29,8 @@ class IMCController(IMCFileTreeItem):
 
     def initialize(self, show_open_imc_file_button: bool = True):
         self._widget = IMCWidget(self, show_open_imc_file_button=show_open_imc_file_button)
-        self._viewer.window.add_dock_widget(self._widget, name='Imaging mass cytometry', area='right')
+        self._dock_widget = self._viewer.window.add_dock_widget(self._widget, name='Imaging mass cytometry',
+                                                                area='right')
 
     def open_imc_file(self, imc_file_path: Union[str, Path]) -> IMCFileModel:
         imc_file_path = Path(imc_file_path).resolve()
@@ -68,7 +72,7 @@ class IMCController(IMCFileTreeItem):
             self._imc_files.remove(imc_file)
             self._closed_imc_files_qt_memory_hack.append(imc_file)
 
-    def show_imc_file_panorama(self, imc_file_panorama: IMCFilePanoramaModel):
+    def show_imc_file_panorama(self, imc_file_panorama: IMCFilePanoramaModel) -> Image:
         with McdParser(imc_file_panorama.imc_file.path) as parser:
             panorama = parser.session.panoramas[imc_file_panorama.id]
             xs_physical = [panorama.x1, panorama.x2, panorama.x3, panorama.x4]
@@ -85,7 +89,7 @@ class IMCController(IMCFileTreeItem):
             data,
             name=f'{imc_file_panorama.imc_file.path.name} [P{imc_file_panorama.id:02d}]',
             metadata={
-                self.panorama_layer_type: True,
+                self.PANORAMA_LAYER_TYPE: True,
                 'imc_file_panorama': str(imc_file_panorama),
             },
             scale=(h_physical / data.shape[0], w_physical / data.shape[1]),
@@ -101,7 +105,7 @@ class IMCController(IMCFileTreeItem):
         self._viewer.layers.remove(imc_file_panorama.shown_layer)
         imc_file_panorama.set_hidden()
 
-    def load_imc_file_acquisition(self, imc_file_acquisition: IMCFileAcquisitionModel):
+    def load_imc_file_acquisition(self, imc_file_acquisition: IMCFileAcquisitionModel) -> List[Image]:
         channels = []
         channels_to_show = []
         channels_to_append = []
@@ -136,7 +140,7 @@ class IMCController(IMCFileTreeItem):
                     self._channels.remove(channel)
         imc_file_acquisition.set_unloaded()
 
-    def show_channel(self, channel: ChannelModel):
+    def show_channel(self, channel: ChannelModel) -> List[Image]:
         imc_file_acquisition_layers = {}
         for imc_file_acquisition in channel.loaded_imc_file_acquisitions[::-1]:
             layer = self._show_imc_file_acquisition_channel(imc_file_acquisition, channel)
@@ -151,7 +155,8 @@ class IMCController(IMCFileTreeItem):
         channel.set_hidden()
         self._widget.select_channel(self._channels.index(channel))
 
-    def _show_imc_file_acquisition_channel(self, imc_file_acquisition: IMCFileAcquisitionModel, channel: ChannelModel):
+    def _show_imc_file_acquisition_channel(self, imc_file_acquisition: IMCFileAcquisitionModel,
+                                           channel: ChannelModel) -> Image:
         imc_file_path = imc_file_acquisition.imc_file.path
         if imc_file_path.suffix.lower() == '.mcd':
             with McdParser(imc_file_path) as parser:
@@ -185,7 +190,7 @@ class IMCController(IMCFileTreeItem):
             contrast_limits=(0, data.max()),  # sets contrast_limits_range
             name=f'{imc_file_path.name} [A{imc_file_acquisition.id:02d} {channel.label}]',
             metadata={
-                self.acquisition_layer_type: True,
+                self.ACQUISITION_LAYER_TYPE: True,
                 'imc_file_acquisition': str(imc_file_acquisition),
                 'channel': str(channel),
             },
@@ -213,16 +218,16 @@ class IMCController(IMCFileTreeItem):
         return None
 
     def _get_next_panorama_layer_index(self):
-        last_panorama_layer_index = self._get_layer_index(self.panorama_layer_type, last=True)
+        last_panorama_layer_index = self._get_layer_index(self.PANORAMA_LAYER_TYPE, last=True)
         if last_panorama_layer_index is not None:
             return last_panorama_layer_index + 1
-        first_acquisition_layer_index = self._get_layer_index(self.acquisition_layer_type, last=False)
+        first_acquisition_layer_index = self._get_layer_index(self.ACQUISITION_LAYER_TYPE, last=False)
         if first_acquisition_layer_index is not None:
             return max(0, first_acquisition_layer_index - 1)
         return len(self.viewer.layers)
 
     def _get_next_acquisition_layer_index(self):
-        last_acquisition_layer_index = self._get_layer_index(self.acquisition_layer_type, last=True)
+        last_acquisition_layer_index = self._get_layer_index(self.ACQUISITION_LAYER_TYPE, last=True)
         if last_acquisition_layer_index is not None:
             return last_acquisition_layer_index + 1
         return len(self.viewer.layers)
@@ -232,8 +237,12 @@ class IMCController(IMCFileTreeItem):
         return self._viewer
 
     @property
-    def widget(self) -> IMCWidget:
+    def widget(self) -> Optional[IMCWidget]:
         return self._widget
+
+    @property
+    def dock_widget(self) -> Optional[QDockWidget]:
+        return self._dock_widget
 
     @property
     def imc_files(self) -> Tuple[IMCFileModel, ...]:
@@ -257,7 +266,7 @@ class IMCController(IMCFileTreeItem):
         return []
 
     @property
-    def _imc_file_tree_parent(self):
+    def _imc_file_tree_parent(self) -> Optional[IMCFileTreeItem]:
         return None
 
     @property

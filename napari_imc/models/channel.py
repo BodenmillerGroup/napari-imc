@@ -27,11 +27,11 @@ class ChannelModel(ModelBase):
         self._is_shown = False
 
     @property
-    def label(self):
+    def label(self) -> str:
         return self._label
 
     @property
-    def opacity(self):
+    def opacity(self) -> float:
         return self._opacity
 
     @opacity.setter
@@ -51,7 +51,7 @@ class ChannelModel(ModelBase):
             layer.contrast_limits = contrast_limits
 
     @property
-    def gamma(self):
+    def gamma(self) -> float:
         return self._gamma
 
     @gamma.setter
@@ -61,7 +61,7 @@ class ChannelModel(ModelBase):
             layer.gamma = gamma
 
     @property
-    def color(self):
+    def color(self) -> Color:
         return self._color
 
     @color.setter
@@ -71,7 +71,7 @@ class ChannelModel(ModelBase):
             layer.colormap = self.create_colormap()
 
     @property
-    def blending(self):
+    def blending(self) -> str:
         return self._blending
 
     @blending.setter
@@ -81,7 +81,7 @@ class ChannelModel(ModelBase):
             layer.blending = blending
 
     @property
-    def interpolation(self):
+    def interpolation(self) -> str:
         return self._interpolation
 
     @interpolation.setter
@@ -91,15 +91,15 @@ class ChannelModel(ModelBase):
             layer.interpolation = interpolation
 
     @property
-    def loaded_imc_file_acquisitions(self):
+    def loaded_imc_file_acquisitions(self) -> List['IMCFileAcquisitionModel']:
         return self._loaded_imc_file_acquisitions
 
     @property
-    def shown_imc_file_acquisition_layers(self):
+    def shown_imc_file_acquisition_layers(self) -> Dict['IMCFileAcquisitionModel', Image]:
         return self._shown_imc_file_acquisition_layers
 
     @property
-    def is_shown(self):
+    def is_shown(self) -> bool:
         return self._is_shown
 
     def set_shown(self, imc_file_acquisition_layers: Dict['IMCFileAcquisitionModel', Image]):
@@ -111,7 +111,7 @@ class ChannelModel(ModelBase):
         self._shown_imc_file_acquisition_layers.clear()
         self._is_shown = False
 
-    def create_colormap(self):
+    def create_colormap(self) -> Colormap:
         return Colormap(name='IMC', colors=[[0., 0., 0., 0.], list(self._color)], interpolation='linear')
 
     def __eq__(self, other):

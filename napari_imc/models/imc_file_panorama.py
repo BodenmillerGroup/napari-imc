@@ -20,23 +20,23 @@ class IMCFilePanoramaModel(ModelBase, IMCFileTreeItem):
         self._is_shown = False
 
     @property
-    def imc_file(self):
+    def imc_file(self) -> 'IMCFileModel':
         return self._imc_file
 
     @property
-    def id(self):
+    def id(self) -> int:
         return self._id
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._description
 
     @property
-    def shown_layer(self):
+    def shown_layer(self) -> Optional[Image]:
         return self._shown_layer
 
     @property
-    def is_shown(self):
+    def is_shown(self) -> bool:
         return self._is_shown
 
     @property
@@ -48,7 +48,7 @@ class IMCFilePanoramaModel(ModelBase, IMCFileTreeItem):
         return self._imc_file.imc_file_tree_panorama_root_item
 
     @property
-    def _imc_file_tree_children(self) -> List['IMCFileTreeItem']:
+    def _imc_file_tree_children(self) -> List[IMCFileTreeItem]:
         return []
 
     @property

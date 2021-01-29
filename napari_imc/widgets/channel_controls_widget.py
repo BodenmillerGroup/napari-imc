@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
 class ChannelControlsWidget(QWidget):
     def __init__(self, controller: 'IMCController', parent=None):
-        # noinspection PyArgumentList
         super(ChannelControlsWidget, self).__init__(parent)
         self._controller = controller
 
@@ -46,17 +45,57 @@ class ChannelControlsWidget(QWidget):
         self.setLayout(layout)
 
         # noinspection PyUnresolvedReferences
-        self._opacity_slider.valueChanged.connect(self._on_opacity_slider_value_changed)
+        @self._opacity_slider.valueChanged.connect
+        def on_opacity_slider_value_changed(value: int):
+            for channel in self._controller.selected_channels:
+                channel.opacity = value / 100
+
         # noinspection PyUnresolvedReferences
-        self._contrast_range_slider.valuesChanged.connect(self._on_contrast_range_slider_values_changed)
+        @self._contrast_range_slider.valuesChanged.connect
+        def on_contrast_range_slider_values_changed(values: Tuple[float, float]):
+            for channel in self._controller.selected_channels:
+                contrast_limits_range_min = min(
+                    (layer.contrast_limits_range[0] for layer in channel.shown_imc_file_acquisition_layers.values()),
+                    default=values[0]
+                )
+                contrast_limits_range_max = max(
+                    (layer.contrast_limits_range[1] for layer in channel.shown_imc_file_acquisition_layers.values()),
+                    default=values[1]
+                )
+                channel.contrast_limits = (
+                    max(values[0], contrast_limits_range_min),
+                    min(values[1], contrast_limits_range_max)
+                )
+
         # noinspection PyUnresolvedReferences
-        self._gamma_slider.valueChanged.connect(self._on_gamma_slider_value_changed)
+        @self._gamma_slider.valueChanged.connect
+        def on_gamma_slider_value_changed(value: int):
+            for channel in self._controller.selected_channels:
+                channel.gamma = value / 100
+
         # noinspection PyUnresolvedReferences
-        self._color_picker.events.color_changed.connect(self._on_color_picker_color_changed)
+        @self._color_picker.events.color_changed.connect
+        def on_color_picker_color_changed(color: QColor):
+            for channel in self._controller.selected_channels:
+                channel.color = (color.red() / 255, color.green() / 255, color.blue() / 255, color.alpha() / 255)
+
         # noinspection PyUnresolvedReferences
-        self._blending_combo_box.activated[str].connect(self._on_blending_combo_box_activated)
+        blending_combo_box_activated = self._blending_combo_box.activated[str]
+
         # noinspection PyUnresolvedReferences
-        self._interpolation_combo_box.activated[str].connect(self._on_interpolation_combo_box_activated)
+        @blending_combo_box_activated.connect
+        def on_blending_combo_box_activated(text: str):
+            for channel in self._controller.selected_channels:
+                channel.blending = text
+
+        # noinspection PyUnresolvedReferences
+        interpolation_combo_box_activated = self._interpolation_combo_box.activated[str]
+
+        # noinspection PyUnresolvedReferences
+        @interpolation_combo_box_activated.connect
+        def on_interpolation_combo_box_activated(text: str):
+            for channel in self._controller.selected_channels:
+                channel.interpolation = text
 
         self.refresh()
 
@@ -102,38 +141,3 @@ class ChannelControlsWidget(QWidget):
             self._interpolation_combo_box.blockSignals(True)
             self._interpolation_combo_box.setCurrentIndex(index)
             self._interpolation_combo_box.blockSignals(False)
-
-    def _on_opacity_slider_value_changed(self, value: int):
-        for channel in self._controller.selected_channels:
-            channel.opacity = value / 100
-
-    def _on_contrast_range_slider_values_changed(self, values: Tuple[float, float]):
-        for channel in self._controller.selected_channels:
-            contrast_limits_range_min = min(
-                (layer.contrast_limits_range[0] for layer in channel.shown_imc_file_acquisition_layers.values()),
-                default=values[0]
-            )
-            contrast_limits_range_max = max(
-                (layer.contrast_limits_range[1] for layer in channel.shown_imc_file_acquisition_layers.values()),
-                default=values[1]
-            )
-            channel.contrast_limits = (
-                max(values[0], contrast_limits_range_min),
-                min(values[1], contrast_limits_range_max)
-            )
-
-    def _on_gamma_slider_value_changed(self, value: int):
-        for channel in self._controller.selected_channels:
-            channel.gamma = value / 100
-
-    def _on_color_picker_color_changed(self, color: QColor):
-        for channel in self._controller.selected_channels:
-            channel.color = (color.red() / 255, color.green() / 255, color.blue() / 255, color.alpha() / 255)
-
-    def _on_blending_combo_box_activated(self, text: str):
-        for channel in self._controller.selected_channels:
-            channel.blending = text
-
-    def _on_interpolation_combo_box_activated(self, text: str):
-        for channel in self._controller.selected_channels:
-            channel.interpolation = text
