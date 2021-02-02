@@ -3,7 +3,6 @@ from napari_imc.widgets.channel_table_model import ChannelTableModel
 from napari_imc.widgets.channel_table_view import ChannelTableView
 from napari_imc.widgets.imc_file_tree_model import IMCFileTreeModel
 from napari_imc.widgets.imc_file_tree_view import IMCFileTreeView
-from napari_imc.widgets.imc_widget import IMCWidget
 
 __all__ = [
     'ChannelControlsWidget',
@@ -11,5 +10,4 @@ __all__ = [
     'ChannelTableView',
     'IMCFileTreeModel',
     'IMCFileTreeView',
-    'IMCWidget',
 ]

@@ -1,13 +1,14 @@
 from qtpy.QtCore import Qt, QObject, Signal
 from qtpy.QtGui import QColor, qGray
-from qtpy.QtWidgets import QColorDialog, QMenu, QPushButton, QWidgetAction
+from qtpy.QtWidgets import QColorDialog, QMenu, QPushButton, QWidget, QWidgetAction
+from typing import Optional
 
 
 class ColorPicker(QPushButton):
     class Events(QObject):
         color_changed = Signal(QColor)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super(ColorPicker, self).__init__(parent)
         self.events = ColorPicker.Events()
         self.setAutoFillBackground(True)

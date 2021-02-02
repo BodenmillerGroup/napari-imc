@@ -4,7 +4,7 @@ from napari.layers.image.image import Interpolation
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor
 from qtpy.QtWidgets import QComboBox, QFormLayout, QSlider, QWidget
-from typing import Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 
 from napari_imc.widgets._color_picker import ColorPicker
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class ChannelControlsWidget(QWidget):
-    def __init__(self, controller: 'IMCController', parent=None):
+    def __init__(self, controller: 'IMCController', parent: Optional[QWidget] = None):
         super(ChannelControlsWidget, self).__init__(parent)
         self._controller = controller
 

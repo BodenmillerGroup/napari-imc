@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
+from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex, QObject
 from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -10,7 +10,7 @@ class ChannelTableModel(QAbstractTableModel):
     CHECK_COLUMN = 0
     LABEL_COLUMN = 1
 
-    def __init__(self, controller: 'IMCController', parent=None):
+    def __init__(self, controller: 'IMCController', parent: Optional[QObject] = None):
         super(ChannelTableModel, self).__init__(parent)
         self._controller = controller
 

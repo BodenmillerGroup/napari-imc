@@ -1,5 +1,6 @@
 from qtpy.QtCore import Qt, QModelIndex, QObject, QPoint, Signal
-from qtpy.QtWidgets import QMenu, QStyle, QTreeView
+from qtpy.QtWidgets import QMenu, QStyle, QTreeView, QWidget
+from typing import Optional
 
 from napari_imc.models import IMCFileModel
 
@@ -8,7 +9,7 @@ class IMCFileTreeView(QTreeView):
     class Events(QObject):
         imc_file_closed = Signal(IMCFileModel)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super(IMCFileTreeView, self).__init__(parent)
         self.events = IMCFileTreeView.Events(self)
         self.setContextMenuPolicy(Qt.CustomContextMenu)

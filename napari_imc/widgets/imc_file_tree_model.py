@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from qtpy.QtCore import Qt, QAbstractItemModel, QModelIndex
+from qtpy.QtCore import Qt, QAbstractItemModel, QModelIndex, QObject
 from typing import Any, Optional, TYPE_CHECKING
 
 from napari_imc.models.base import IMCFileTreeItem
@@ -13,7 +13,7 @@ class IMCFileTreeModel(QAbstractItemModel):
     ID_COLUMN = 1
     DESCRIPTION_COLUMN = 2
 
-    def __init__(self, controller: 'IMCController', parent=None):
+    def __init__(self, controller: 'IMCController', parent: Optional[QObject] = None):
         super(IMCFileTreeModel, self).__init__(parent)
         self._controller = controller
 

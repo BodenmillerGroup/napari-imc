@@ -1,53 +1,43 @@
-import napari
+import numpy as np
 
-from imageio import imread
-from imctools.io.mcd.mcdparser import McdParser
-from imctools.io.txt.txtparser import TxtParser
+from napari import Viewer
 from napari.layers import Image
 from pathlib import Path
-from qtpy.QtWidgets import QDockWidget
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
+from napari_imc.io import McdFileReader, TxtFileReader
 from napari_imc.models import ChannelModel, IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
 from napari_imc.models.base import IMCFileTreeItem
-from napari_imc.widgets import IMCWidget
+
+if TYPE_CHECKING:
+    from napari_imc.imc_widget import IMCWidget
 
 
 class IMCController(IMCFileTreeItem):
     PANORAMA_LAYER_TYPE = 'imc_panorama_layer'
     ACQUISITION_LAYER_TYPE = 'imc_acquisition_layer'
+    FILE_READERS = [McdFileReader, TxtFileReader]
 
-    def __init__(self, viewer: napari.Viewer):
+    def __init__(self, viewer: Viewer, widget: 'IMCWidget'):
         super(IMCController, self).__init__()
-        self._viewer = viewer
-        self._widget: Optional[IMCWidget] = None
-        self._dock_widget: Optional[QDockWidget] = None
+        self._viewer: Viewer = viewer
+        self._widget: 'IMCWidget' = widget
         self._imc_files: List[IMCFileModel] = []
         self._channels: List[ChannelModel] = []
         self._selected_channels: List[ChannelModel] = []
         self._closed_imc_files_qt_memory_hack: List[IMCFileModel] = []
-
-    def initialize(self, show_open_imc_file_button: bool = True):
-        self._widget = IMCWidget(self, show_open_imc_file_button=show_open_imc_file_button)
-        self._dock_widget = self._viewer.window.add_dock_widget(self._widget, name='Imaging mass cytometry',
-                                                                area='right')
 
     def open_imc_file(self, imc_file_path: Union[str, Path]) -> IMCFileModel:
         imc_file_path = Path(imc_file_path).resolve()
         for imc_file in self.imc_files:
             if imc_file.path.samefile(imc_file_path):
                 return imc_file
-        if imc_file_path.suffix.lower() == '.mcd':
-            with McdParser(imc_file_path) as parser:
-                panoramas = [p for p in parser.session.panoramas.values() if p.image_type != 'Default']
-                acquisitions = [a for a in parser.session.acquisitions.values() if a.is_valid]
-        elif imc_file_path.suffix.lower() == '.txt':
-            with TxtParser(imc_file_path) as parser:
-                acquisition_data = parser.get_acquisition_data()
-                panoramas = []
-                acquisitions = [acquisition_data.acquisition]
-        else:
+        file_reader = next(filter(lambda x: x.accepts(imc_file_path), self.FILE_READERS))
+        if file_reader is None:
             raise ValueError(f'Unsupported file type: {imc_file_path.suffix.lower()}')
+        with file_reader(imc_file_path) as f:
+            panoramas = f.get_panoramas()
+            acquisitions = f.get_acquisitions()
         imc_file = IMCFileModel(imc_file_path, self)
         for p in panoramas:
             imc_file_panorama = IMCFilePanoramaModel(imc_file, p.id, p.description)
@@ -73,18 +63,13 @@ class IMCController(IMCFileTreeItem):
             self._closed_imc_files_qt_memory_hack.append(imc_file)
 
     def show_imc_file_panorama(self, imc_file_panorama: IMCFilePanoramaModel) -> Image:
-        with McdParser(imc_file_panorama.imc_file.path) as parser:
-            panorama = parser.session.panoramas[imc_file_panorama.id]
-            xs_physical = [panorama.x1, panorama.x2, panorama.x3, panorama.x4]
-            ys_physical = [panorama.y1, panorama.y2, panorama.y3, panorama.y4]
-            x_physical, y_physical = min(xs_physical), min(ys_physical)
-            w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
-            data = imread(parser.get_panorama_image(imc_file_panorama.id))
-            if x_physical != panorama.x1:
-                data = data[:, ::-1, :]
-            if y_physical != panorama.y1:
-                data = data[::-1, :, :]
+        file_reader = next(filter(lambda x: x.accepts(imc_file_panorama.imc_file.path), self.FILE_READERS))
+        if file_reader is None:
+            raise ValueError(f'Unsupported file type: {imc_file_panorama.imc_file.path.suffix.lower()}')
+        with file_reader(imc_file_panorama.imc_file.path) as f:
+            (x_physical, y_physical, w_physical, h_physical), data = f.read_panorama(imc_file_panorama.id)
         new_layer_index = self._get_next_panorama_layer_index()
+        # noinspection PyTypeChecker
         layer = self._viewer.add_image(
             data,
             name=f'{imc_file_panorama.imc_file.path.name} [P{imc_file_panorama.id:02d}]',
@@ -157,38 +142,23 @@ class IMCController(IMCFileTreeItem):
 
     def _show_imc_file_acquisition_channel(self, imc_file_acquisition: IMCFileAcquisitionModel,
                                            channel: ChannelModel) -> Image:
-        imc_file_path = imc_file_acquisition.imc_file.path
-        if imc_file_path.suffix.lower() == '.mcd':
-            with McdParser(imc_file_path) as parser:
-                acquisition = parser.session.acquisitions[imc_file_acquisition.id]
-                xs_physical = [acquisition.roi_start_x_pos_um, acquisition.roi_end_x_pos_um]
-                ys_physical = [acquisition.roi_start_y_pos_um, acquisition.roi_end_y_pos_um]
-                x_physical, y_physical = min(xs_physical), min(ys_physical, default=0)
-                w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
-                data = parser.get_acquisition_data(acquisition.id).get_image_by_label(channel.label)
-                if x_physical != acquisition.roi_start_x_pos_um:
-                    data = data[:, ::-1]
-                if y_physical != acquisition.roi_start_y_pos_um:
-                    data = data[::-1, :]
-        elif imc_file_path.suffix.lower() == '.txt':
-            with TxtParser(imc_file_path) as parser:
-                acquisition_data = parser.get_acquisition_data()
-                acquisition = acquisition_data.acquisition
-                x_physical, y_physical = 0, 0
-                w_physical, h_physical = acquisition.max_x, acquisition.max_y
-                data = acquisition_data.get_image_by_label(channel.label)
-        else:
-            raise ValueError(f'Unsupported file type: {imc_file_path.suffix.lower()}')
+        file_reader = next(filter(lambda x: x.accepts(imc_file_acquisition.imc_file.path), self.FILE_READERS))
+        if file_reader is None:
+            raise ValueError(f'Unsupported file type: {imc_file_acquisition.imc_file.path.suffix.lower()}')
+        with file_reader(imc_file_acquisition.imc_file.path) as f:
+            (x_physical, y_physical, w_physical, h_physical), data = f.read_acquisition(imc_file_acquisition.id,
+                                                                                        channel.label)
         if channel.contrast_limits is None:
-            channel.contrast_limits = (0, data.max())
+            channel.contrast_limits = (0, np.amax(data))
         new_layer_index = self._get_next_acquisition_layer_index()
+        # noinspection PyTypeChecker
         layer = self._viewer.add_image(
             data,
             colormap=channel.create_colormap(),
             gamma=channel.gamma,
             interpolation=channel.interpolation,
-            contrast_limits=(0, data.max()),  # sets contrast_limits_range
-            name=f'{imc_file_path.name} [A{imc_file_acquisition.id:02d} {channel.label}]',
+            contrast_limits=(0, np.amax(data)),  # sets contrast_limits_range
+            name=f'{imc_file_acquisition.imc_file.path.name} [A{imc_file_acquisition.id:02d} {channel.label}]',
             metadata={
                 self.ACQUISITION_LAYER_TYPE: True,
                 'imc_file_acquisition': str(imc_file_acquisition),
@@ -233,16 +203,12 @@ class IMCController(IMCFileTreeItem):
         return len(self.viewer.layers)
 
     @property
-    def viewer(self) -> napari.Viewer:
+    def viewer(self) -> Viewer:
         return self._viewer
 
     @property
-    def widget(self) -> Optional[IMCWidget]:
+    def widget(self) -> 'IMCWidget':
         return self._widget
-
-    @property
-    def dock_widget(self) -> Optional[QDockWidget]:
-        return self._dock_widget
 
     @property
     def imc_files(self) -> Tuple[IMCFileModel, ...]:

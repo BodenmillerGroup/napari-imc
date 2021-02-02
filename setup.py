@@ -53,10 +53,7 @@ setup(
     ],
     entry_points={
         'napari.plugin': [
-            'imc = napari_imc',
-        ],
-        'console_scripts': [
-            'napari-imc = napari_imc.__main__:main',
+            'napari-imc = napari_imc',
         ],
     },
 )
