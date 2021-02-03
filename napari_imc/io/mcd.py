@@ -19,13 +19,13 @@ class McdFileReader(FileReaderBase):
     def get_panoramas(self) -> List[IMCFilePanoramaModel]:
         return [
             IMCFilePanoramaModel(self._path, panorama.id, panorama.description)
-            for panorama in self._mcd_parser.session.panoramas.values()
+            for panorama in self._mcd_parser.session.panoramas.values() if panorama.image_type != 'Default'
         ]
 
     def get_acquisitions(self) -> List[IMCFileAcquisitionModel]:
         return [
             IMCFileAcquisitionModel(self._path, acquisition.id, acquisition.description, acquisition.channel_labels)
-            for acquisition in self._mcd_parser.session.acquisitions.values()
+            for acquisition in self._mcd_parser.session.acquisitions.values() if acquisition.is_valid
         ]
 
     def read_panorama(self, panorama_id: int) -> Tuple[ImageDimensions, np.ndarray]:
