@@ -26,7 +26,9 @@ https://napari.org/docs/plugins/index.html
 
 You can install `napari-imc` via [pip]:
 
-    pip install napari-imc
+    pip install napari[all] napari-imc
+
+As napari is under active development, the use of virtual environments is recommended.
 
 ## Contributing
 
