@@ -8,6 +8,8 @@
 
 Imaging Mass Cytometry (IMC) file type support for napari
 
+Open .mcd/.txt files and interactively view panoramas and multi-channel acquisitions using napari 
+
 ----------------------------------
 
 This [napari] plugin was generated with [Cookiecutter] using with [@napari]'s [cookiecutter-napari-plugin] template.
