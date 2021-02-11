@@ -4,7 +4,8 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import List, Tuple, Union
 
-from napari_imc.models import IMCFileAcquisitionModel, IMCFilePanoramaModel
+from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
+from napari_imc.models.base import IMCFileTreeItem
 
 ImageDimensions = Tuple[float, float, float, float]
 
@@ -15,12 +16,18 @@ class FileReaderBase:
     def __init__(self, path: Union[str, Path]):
         self._path = Path(path)
 
+    def get_imc_file(self, imc_file_tree_root_item: IMCFileTreeItem) -> IMCFileModel:
+        imc_file = IMCFileModel(self._path, imc_file_tree_root_item)
+        imc_file.panoramas.extend(self._get_imc_file_panoramas(imc_file))
+        imc_file.acquisitions.extend(self._get_imc_file_acquisitions(imc_file))
+        return imc_file
+
     @abstractmethod
-    def get_panoramas(self) -> List[IMCFilePanoramaModel]:
+    def _get_imc_file_panoramas(self, imc_file: IMCFileModel) -> List[IMCFilePanoramaModel]:
         pass
 
     @abstractmethod
-    def get_acquisitions(self) -> List[IMCFileAcquisitionModel]:
+    def _get_imc_file_acquisitions(self, imc_file: IMCFileModel) -> List[IMCFileAcquisitionModel]:
         pass
 
     @abstractmethod
@@ -41,4 +48,4 @@ class FileReaderBase:
 
     @classmethod
     def accepts(cls, path: Union[str, Path]):
-        return path.suffix.lower() in cls.suffixes
+        return Path(path).suffix.lower() in cls.suffixes

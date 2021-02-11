@@ -6,7 +6,7 @@ from napari_imc.io.base import FileReaderBase, ImageDimensions
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-from napari_imc.models import IMCFileAcquisitionModel, IMCFilePanoramaModel
+from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
 
 
 class McdFileReader(FileReaderBase):
@@ -16,15 +16,15 @@ class McdFileReader(FileReaderBase):
         super(McdFileReader, self).__init__(path)
         self._mcd_parser: Optional[McdParser] = None
 
-    def get_panoramas(self) -> List[IMCFilePanoramaModel]:
+    def _get_imc_file_panoramas(self, imc_file: IMCFileModel) -> List[IMCFilePanoramaModel]:
         return [
-            IMCFilePanoramaModel(self._path, panorama.id, panorama.description)
+            IMCFilePanoramaModel(imc_file, panorama.id, panorama.image_type, panorama.description)
             for panorama in self._mcd_parser.session.panoramas.values() if panorama.image_type != 'Default'
         ]
 
-    def get_acquisitions(self) -> List[IMCFileAcquisitionModel]:
+    def _get_imc_file_acquisitions(self, imc_file: IMCFileModel) -> List[IMCFileAcquisitionModel]:
         return [
-            IMCFileAcquisitionModel(self._path, acquisition.id, acquisition.description, acquisition.channel_labels)
+            IMCFileAcquisitionModel(imc_file, acquisition.id, acquisition.description, acquisition.channel_labels)
             for acquisition in self._mcd_parser.session.acquisitions.values() if acquisition.is_valid
         ]
 

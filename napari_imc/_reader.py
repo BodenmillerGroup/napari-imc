@@ -24,7 +24,10 @@ def reader_function(path):
         imc_widget = _get_imc_widget(viewer)
         paths = [path] if not isinstance(path, list) else path
         for path in paths:
-            imc_widget.controller.open_imc_file(path)
+            imc_file = imc_widget.controller.open_imc_file(path)
+            for panorama in imc_file.panoramas:
+                if panorama.image_type == 'Imported':
+                    imc_widget.controller.show_imc_file_panorama(panorama)
         return []
     return None
 

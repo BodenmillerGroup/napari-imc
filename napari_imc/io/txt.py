@@ -5,7 +5,7 @@ from napari_imc.io.base import FileReaderBase, ImageDimensions
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-from napari_imc.models import IMCFileAcquisitionModel, IMCFilePanoramaModel
+from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
 
 
 class TxtFileReader(FileReaderBase):
@@ -15,13 +15,13 @@ class TxtFileReader(FileReaderBase):
         super(TxtFileReader, self).__init__(path)
         self._txt_parser: Optional[TxtParser] = None
 
-    def get_panoramas(self) -> List[IMCFilePanoramaModel]:
+    def _get_imc_file_panoramas(self, imc_file: IMCFileModel) -> List[IMCFilePanoramaModel]:
         return []
 
-    def get_acquisitions(self) -> List[IMCFileAcquisitionModel]:
+    def _get_imc_file_acquisitions(self, imc_file: IMCFileModel) -> List[IMCFileAcquisitionModel]:
         acquisition = self._txt_parser.get_acquisition_data().acquisition
         return [
-            IMCFileAcquisitionModel(self._path, acquisition.id, acquisition.description, acquisition.channel_labels)
+            IMCFileAcquisitionModel(imc_file, acquisition.id, acquisition.description, acquisition.channel_labels)
         ]
 
     def read_panorama(self, panorama_id: int) -> Tuple[ImageDimensions, np.ndarray]:

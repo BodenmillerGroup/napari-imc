@@ -11,9 +11,9 @@ class IMCFileModel(ModelBase, IMCFileTreeItem):
         ModelBase.__init__(self)
         IMCFileTreeItem.__init__(self)
         self._path = path
-        self._imc_file_tree_root_item = imc_file_tree_root_item
         self._panoramas: List[IMCFilePanoramaModel] = []
         self._acquisitions: List[IMCFileAcquisitionModel] = []
+        self._imc_file_tree_root_item = imc_file_tree_root_item
         self._imc_file_tree_panorama_root_item = IMCFileModel.IMCFileTreePanoramaRootItem(self)
         self._imc_file_tree_acquisition_root_item = IMCFileModel.IMCFileTreeAcquisitionRootItem(self)
 

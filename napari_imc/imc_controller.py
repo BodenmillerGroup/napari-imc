@@ -36,15 +36,7 @@ class IMCController(IMCFileTreeItem):
         if file_reader is None:
             raise ValueError(f'Unsupported file type: {imc_file_path.suffix.lower()}')
         with file_reader(imc_file_path) as f:
-            panoramas = f.get_panoramas()
-            acquisitions = f.get_acquisitions()
-        imc_file = IMCFileModel(imc_file_path, self)
-        for p in panoramas:
-            imc_file_panorama = IMCFilePanoramaModel(imc_file, p.id, p.description)
-            imc_file.panoramas.append(imc_file_panorama)
-        for a in acquisitions:
-            imc_file_acquisition = IMCFileAcquisitionModel(imc_file, a.id, a.description, a.channel_labels)
-            imc_file.acquisitions.append(imc_file_acquisition)
+            imc_file = f.get_imc_file(self)
         with self._widget.imc_file_tree_model.append_imc_file():
             self._imc_files.append(imc_file)
         return imc_file
