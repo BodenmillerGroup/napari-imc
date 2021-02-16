@@ -28,7 +28,7 @@ def reader_function(path):
             for panorama in imc_file.panoramas:
                 if panorama.image_type == 'Imported':
                     imc_widget.controller.show_imc_file_panorama(panorama)
-        return []
+        return [(None,)]  # empty layer sentinel
     return None
 
 
