@@ -79,7 +79,8 @@ class IMCController(IMCFileTreeItem):
         return layer
 
     def hide_imc_file_panorama(self, imc_file_panorama: IMCFilePanoramaModel):
-        self._viewer.layers.remove(imc_file_panorama.shown_layer)
+        if imc_file_panorama.shown_layer in self._viewer.layers:
+            self._viewer.layers.remove(imc_file_panorama.shown_layer)
         imc_file_panorama.set_hidden()
 
     def load_imc_file_acquisition(self, imc_file_acquisition: IMCFileAcquisitionModel) -> List[Image]:
@@ -168,7 +169,8 @@ class IMCController(IMCFileTreeItem):
 
     def _hide_imc_file_acquisition_channel(self, imc_file_acquisition: IMCFileAcquisitionModel, channel: ChannelModel):
         layer = channel.shown_imc_file_acquisition_layers[imc_file_acquisition]
-        self._viewer.layers.remove(layer)
+        if layer in self._viewer.layers:
+            self._viewer.layers.remove(layer)
 
     def _get_layer_index(self, layer_type: str, last: bool = False):
         layer_enumerator = enumerate(self.viewer.layers)
