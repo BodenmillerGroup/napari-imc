@@ -11,8 +11,6 @@ ImageDimensions = Tuple[float, float, float, float]
 
 
 class FileReaderBase:
-    suffixes = []
-
     def __init__(self, path: Union[str, Path]):
         self._path = Path(path)
 
@@ -47,5 +45,5 @@ class FileReaderBase:
         pass
 
     @classmethod
-    def accepts(cls, path: Union[str, Path]):
-        return Path(path).suffix.lower() in cls.suffixes
+    def accepts(cls, path: Union[str, Path]) -> bool:
+        return False
