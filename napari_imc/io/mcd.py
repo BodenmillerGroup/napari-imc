@@ -10,8 +10,6 @@ from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePano
 
 
 class McdFileReader(FileReaderBase):
-    suffixes = ['.mcd']
-
     def __init__(self, path: Union[str, Path]):
         super(McdFileReader, self).__init__(path)
         self._mcd_parser: Optional[McdParser] = None
@@ -60,3 +58,7 @@ class McdFileReader(FileReaderBase):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._mcd_parser.close()
+
+    @classmethod
+    def accepts(cls, path: Union[str, Path]) -> bool:
+        return Path(path).suffix.lower() == '.mcd'

@@ -5,7 +5,7 @@ from napari.layers import Image
 from pathlib import Path
 from typing import Any, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
-from napari_imc.io import McdFileReader, TxtFileReader
+from napari_imc.io import ImaxtFileReader, McdFileReader, TxtFileReader
 from napari_imc.models import ChannelModel, IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
 from napari_imc.models.base import IMCFileTreeItem
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class IMCController(IMCFileTreeItem):
     PANORAMA_LAYER_TYPE = 'imc_panorama_layer'
     ACQUISITION_LAYER_TYPE = 'imc_acquisition_layer'
-    FILE_READERS = [McdFileReader, TxtFileReader]
+    FILE_READERS = [ImaxtFileReader, McdFileReader, TxtFileReader]
 
     def __init__(self, viewer: Viewer, widget: 'IMCWidget'):
         super(IMCController, self).__init__()
@@ -27,16 +27,25 @@ class IMCController(IMCFileTreeItem):
         self._selected_channels: List[ChannelModel] = []
         self._closed_imc_files_qt_memory_hack: List[IMCFileModel] = []
 
-    def open_imc_file(self, imc_file_path: Union[str, Path]) -> IMCFileModel:
+    @classmethod
+    def is_imc_file(cls, path: Union[str, Path]) -> bool:
+        return any(file_reader.accepts(path) for file_reader in cls.FILE_READERS)
+
+    def open_imc_file(self, imc_file_path: Union[str, Path]) -> Optional[IMCFileModel]:
         imc_file_path = Path(imc_file_path).resolve()
         for imc_file in self.imc_files:
             if imc_file.path.samefile(imc_file_path):
                 return imc_file
-        file_reader = next(filter(lambda x: x.accepts(imc_file_path), self.FILE_READERS))
-        if file_reader is None:
-            raise ValueError(f'Unsupported file type: {imc_file_path.suffix.lower()}')
-        with file_reader(imc_file_path) as f:
-            imc_file = f.get_imc_file(self)
+        imc_file = None
+        for file_reader in self.FILE_READERS:
+            if file_reader.accepts(imc_file_path):
+                try:
+                    with file_reader(imc_file_path) as f:
+                        imc_file = f.get_imc_file(self)
+                except:
+                    pass  # ignored intentionally
+        if imc_file is None:
+            return None
         with self._widget.imc_file_tree_model.append_imc_file():
             self._imc_files.append(imc_file)
         return imc_file
@@ -54,12 +63,18 @@ class IMCController(IMCFileTreeItem):
             self._imc_files.remove(imc_file)
             self._closed_imc_files_qt_memory_hack.append(imc_file)
 
-    def show_imc_file_panorama(self, imc_file_panorama: IMCFilePanoramaModel) -> Image:
-        file_reader = next(filter(lambda x: x.accepts(imc_file_panorama.imc_file.path), self.FILE_READERS))
-        if file_reader is None:
-            raise ValueError(f'Unsupported file type: {imc_file_panorama.imc_file.path.suffix.lower()}')
-        with file_reader(imc_file_panorama.imc_file.path) as f:
-            (x_physical, y_physical, w_physical, h_physical), data = f.read_panorama(imc_file_panorama.id)
+    def show_imc_file_panorama(self, imc_file_panorama: IMCFilePanoramaModel) -> Optional[Image]:
+        result = None
+        for file_reader in self.FILE_READERS:
+            if file_reader.accepts(imc_file_panorama.imc_file.path):
+                try:
+                    with file_reader(imc_file_panorama.imc_file.path) as f:
+                        result = f.read_panorama(imc_file_panorama.id)
+                except:
+                    pass  # ignored intentionally
+        if result is None:
+            return None
+        (x_physical, y_physical, w_physical, h_physical), data = result
         new_layer_index = self._get_next_panorama_layer_index()
         # noinspection PyTypeChecker
         layer = self._viewer.add_image(
@@ -103,8 +118,9 @@ class IMCController(IMCFileTreeItem):
         layers = []
         for channel in channels_to_show[::-1]:
             layer = self._show_imc_file_acquisition_channel(imc_file_acquisition, channel)
-            channel.shown_imc_file_acquisition_layers[imc_file_acquisition] = layer
-            layers.append(layer)
+            if layer is not None:
+                channel.shown_imc_file_acquisition_layers[imc_file_acquisition] = layer
+                layers.append(layer)
         return layers
 
     def unload_imc_file_acquisition(self, imc_file_acquisition: IMCFileAcquisitionModel):
@@ -122,7 +138,8 @@ class IMCController(IMCFileTreeItem):
         imc_file_acquisition_layers = {}
         for imc_file_acquisition in channel.loaded_imc_file_acquisitions[::-1]:
             layer = self._show_imc_file_acquisition_channel(imc_file_acquisition, channel)
-            imc_file_acquisition_layers[imc_file_acquisition] = layer
+            if layer is not None:
+                imc_file_acquisition_layers[imc_file_acquisition] = layer
         channel.set_shown(imc_file_acquisition_layers)
         self._widget.select_channel(self._channels.index(channel))
         return list(imc_file_acquisition_layers.values())
@@ -134,13 +151,18 @@ class IMCController(IMCFileTreeItem):
         self._widget.select_channel(self._channels.index(channel))
 
     def _show_imc_file_acquisition_channel(self, imc_file_acquisition: IMCFileAcquisitionModel,
-                                           channel: ChannelModel) -> Image:
-        file_reader = next(filter(lambda x: x.accepts(imc_file_acquisition.imc_file.path), self.FILE_READERS))
-        if file_reader is None:
-            raise ValueError(f'Unsupported file type: {imc_file_acquisition.imc_file.path.suffix.lower()}')
-        with file_reader(imc_file_acquisition.imc_file.path) as f:
-            (x_physical, y_physical, w_physical, h_physical), data = f.read_acquisition(imc_file_acquisition.id,
-                                                                                        channel.label)
+                                           channel: ChannelModel) -> Optional[Image]:
+        result = None
+        for file_reader in self.FILE_READERS:
+            if file_reader.accepts(imc_file_acquisition.imc_file.path):
+                try:
+                    with file_reader(imc_file_acquisition.imc_file.path) as f:
+                        result = f.read_acquisition(imc_file_acquisition.id, channel.label)
+                except:
+                    pass  # ignored intentionally
+        if result is None:
+            return None
+        (x_physical, y_physical, w_physical, h_physical), data = result
         if channel.contrast_limits is None:
             channel.contrast_limits = (0, np.amax(data))
         new_layer_index = self._get_next_acquisition_layer_index()
@@ -168,8 +190,8 @@ class IMCController(IMCFileTreeItem):
         return layer
 
     def _hide_imc_file_acquisition_channel(self, imc_file_acquisition: IMCFileAcquisitionModel, channel: ChannelModel):
-        layer = channel.shown_imc_file_acquisition_layers[imc_file_acquisition]
-        if layer in self._viewer.layers:
+        layer = channel.shown_imc_file_acquisition_layers.get(imc_file_acquisition)
+        if layer is not None and layer in self._viewer.layers:
             self._viewer.layers.remove(layer)
 
     def _get_layer_index(self, layer_type: str, last: bool = False):

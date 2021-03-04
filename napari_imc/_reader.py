@@ -1,6 +1,5 @@
 from napari import Viewer
 from napari_plugin_engine import napari_hook_implementation
-from pathlib import Path
 from typing import Optional
 
 from napari_imc.imc_widget import IMCWidget
@@ -9,11 +8,10 @@ from napari_imc.imc_controller import IMCController
 
 @napari_hook_implementation
 def napari_get_reader(path):
-    suffixes = [suffix.lower() for file_reader in IMCController.FILE_READERS for suffix in file_reader.suffixes]
     if isinstance(path, list):
-        if any(Path(p).suffix.lower() not in suffixes for p in path):
+        if any(not IMCController.is_imc_file(p) for p in path):
             return None
-    elif Path(path).suffix.lower() not in suffixes:
+    elif not IMCController.is_imc_file(path):
         return None
     return reader_function
 
@@ -25,9 +23,10 @@ def reader_function(path):
         paths = [path] if not isinstance(path, list) else path
         for path in paths:
             imc_file = imc_widget.controller.open_imc_file(path)
-            for panorama in imc_file.panoramas:
-                if panorama.image_type == 'Imported':
-                    imc_widget.controller.show_imc_file_panorama(panorama)
+            if imc_file is not None:
+                for panorama in imc_file.panoramas:
+                    if panorama.image_type == 'Imported':
+                        imc_widget.controller.show_imc_file_panorama(panorama)
         return [(None,)]  # empty layer sentinel
     return None
 

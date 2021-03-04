@@ -9,8 +9,6 @@ from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePano
 
 
 class TxtFileReader(FileReaderBase):
-    suffixes = ['.txt']
-
     def __init__(self, path: Union[str, Path]):
         super(TxtFileReader, self).__init__(path)
         self._txt_parser: Optional[TxtParser] = None
@@ -41,3 +39,7 @@ class TxtFileReader(FileReaderBase):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+    @classmethod
+    def accepts(cls, path: Union[str, Path]) -> bool:
+        return Path(path).suffix.lower() == '.txt'

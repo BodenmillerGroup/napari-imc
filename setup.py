@@ -38,6 +38,9 @@ setup(
     install_requires=requirements,
     use_scm_version=use_scm,
     setup_requires=['setuptools_scm'],
+    extras_require={
+        'IMAXT': ['zarr'],
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
