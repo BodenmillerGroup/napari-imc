@@ -112,7 +112,7 @@ class ChannelModel(ModelBase):
         self._is_shown = False
 
     def create_colormap(self) -> Colormap:
-        return Colormap(name='IMC', colors=[[0., 0., 0., 0.], list(self._color)], interpolation='linear')
+        return Colormap(name='IMC', colors=[[0., 0., 0., self.color[-1]], list(self._color)], interpolation='linear')
 
     def __eq__(self, other):
         if other is None or not isinstance(other, ChannelModel):

@@ -15,7 +15,10 @@ except:
 
 class ImaxtFileReader(FileReaderBase):
     def __init__(self, path: Union[str, Path]):
-        super(ImaxtFileReader, self).__init__(self._get_zarr_path(path))
+        path = Path(path)
+        if path.is_file():
+            path = path.parent
+        super(ImaxtFileReader, self).__init__(path)
         self._zarr_group: Optional['zarr.hierarchy.Group'] = None
 
     def _get_imc_file_panoramas(self, imc_file: IMCFileModel) -> List[IMCFilePanoramaModel]:
@@ -71,17 +74,12 @@ class ImaxtFileReader(FileReaderBase):
     @classmethod
     def accepts(cls, path: Union[str, Path]) -> bool:
         if zarr:
-            zarr_path = cls._get_zarr_path(path)
+            path = Path(path)
+            if path.is_file():
+                path = path.parent
             try:
-                with zarr.open_group(str(zarr_path), mode='r') as zarr_group:
+                with zarr.open_group(str(path), mode='r') as zarr_group:
                     return 'panoramas' in zarr_group.attrs['meta'] and 'acquisitions' in zarr_group.attrs['meta']
             except:
                 pass  # ignored intentionally
         return False
-
-    @staticmethod
-    def _get_zarr_path(path: Union[str, Path]) -> Path:
-        path = Path(path)
-        if path.is_file() and path.name == 'mcd_schema.xml':
-            path = path.parent
-        return path
