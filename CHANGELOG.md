@@ -10,4 +10,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Last release before introducing this changelog
 
 
-[v0.5.1]: https://github.com/BodenmillerGroup/xtiff/releases/tag/v0.5.1
+[v0.5.1]: https://github.com/BodenmillerGroup/napari-imc/releases/tag/v0.5.1
