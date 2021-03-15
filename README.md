@@ -38,12 +38,12 @@ Created and maintained by Jonas Windhager [jonas.windhager@uzh.ch](mailto:jonas.
 
 ## Contributing
 
-[Contributing](https://github.com/BodenmillerGroup/napari-imc/blob/main/CONTRIBUTING.md)
+[Contributing](https://github.com/BodenmillerGroup/napari-imc/blob/master/CONTRIBUTING.md)
 
 ## Changelog
 
-[Changelog](https://github.com/BodenmillerGroup/napari-imc/blob/main/CHANGELOG.md)
+[Changelog](https://github.com/BodenmillerGroup/napari-imc/blob/master/CHANGELOG.md)
 
 ## License
 
-[MIT](https://github.com/BodenmillerGroup/napari-imc/blob/main/LICENSE.md)
+[MIT](https://github.com/BodenmillerGroup/napari-imc/blob/master/LICENSE.md)
