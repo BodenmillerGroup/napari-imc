@@ -1,61 +1,49 @@
 # napari-imc
 
-[![License](https://img.shields.io/pypi/l/napari-imc.svg?color=green)](https://github.com/BodenmillerGroup/napari-imc/raw/master/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/napari-imc.svg?color=green)](https://pypi.org/project/napari-imc)
-[![Python Version](https://img.shields.io/pypi/pyversions/napari-imc.svg?color=green)](https://python.org)
-<!-- [![tests](https://github.com/BodenmillerGroup/napari-imc/workflows/tests/badge.svg)](https://github.com/BodenmillerGroup/napari-imc/actions) -->
-<!-- [![codecov](https://codecov.io/gh/BodenmillerGroup/napari-imc/branch/master/graph/badge.svg)](https://codecov.io/gh/BodenmillerGroup/napari-imc) -->
+![PyPI](https://img.shields.io/pypi/v/napari-imc)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/napari-imc)
+![PyPI - License](https://img.shields.io/pypi/l/napari-imc)
+![GitHub issues](https://img.shields.io/github/issues/BodenmillerGroup/napari-imc)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/BodenmillerGroup/napari-imc)
 
 Imaging Mass Cytometry (IMC) file type support for napari
 
-Open .mcd/.txt files and interactively view panoramas and multi-channel acquisitions using napari 
+Open .mcd/.txt files and interactively view panoramas and multi-channel acquisitions using napari
 
-----------------------------------
+## Requirements
 
-This [napari] plugin was generated with [Cookiecutter] using with [@napari]'s [cookiecutter-napari-plugin] template.
+This package requires Python 3.7 or newer.
 
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
+Python package dependencies are listed in [requirements.txt](https://github.com/BodenmillerGroup/napari-imc/blob/main/requirements.txt).
 
-and review the napari docs for plugin developers:
-https://napari.org/docs/plugins/index.html
--->
+Please note that napari is under active development. Currently, this package supports napari 0.4.5 and newer. 
+
+Using virtual environments is strongly recommended.
 
 ## Installation
 
-You can install `napari-imc` via [pip]:
+Ensure that `napari[all]` is installed.
 
-    pip install napari[all] napari-imc
+Install napari-imc and its dependencies with:
 
-As napari is under active development, the use of virtual environments is recommended.
+    pip install napari-imc
+
+## Usage
+
+Use `napari` to open Imaging Mass Cytometry (IMC) .mcd/.txt files
+
+## Authors
+
+Created and maintained by Jonas Windhager [jonas.windhager@uzh.ch](mailto:jonas.windhager@uzh.ch)
 
 ## Contributing
 
-Contributions are very welcome. Tests can be run with [tox], please ensure
-the coverage at least stays the same before you submit a pull request.
+[Contributing](https://github.com/BodenmillerGroup/napari-imc/blob/main/CONTRIBUTING.md)
+
+## Changelog
+
+[Changelog](https://github.com/BodenmillerGroup/napari-imc/blob/main/CHANGELOG.md)
 
 ## License
 
-Distributed under the terms of the [MIT] license,
-"napari-imc" is free and open source software
-
-## Issues
-
-If you encounter any problems, please [file an issue] along with a detailed description.
-
-[napari]: https://github.com/napari/napari
-[Cookiecutter]: https://github.com/audreyr/cookiecutter
-[@napari]: https://github.com/napari
-[MIT]: http://opensource.org/licenses/MIT
-[BSD-3]: http://opensource.org/licenses/BSD-3-Clause
-[GNU GPL v3.0]: http://www.gnu.org/licenses/gpl-3.0.txt
-[GNU LGPL v3.0]: http://www.gnu.org/licenses/lgpl-3.0.txt
-[Apache Software License 2.0]: http://www.apache.org/licenses/LICENSE-2.0
-[Mozilla Public License 2.0]: https://www.mozilla.org/media/MPL/2.0/index.txt
-[cookiecutter-napari-plugin]: https://github.com/napari/cookiecutter-napari-plugin
-[file an issue]: https://github.com/BodenmillerGroup/napari-imc/issues
-[napari]: https://github.com/napari/napari
-[tox]: https://tox.readthedocs.io/en/latest/
-[pip]: https://pypi.org/project/pip/
-[PyPI]: https://pypi.org/
+[MIT](https://github.com/BodenmillerGroup/napari-imc/blob/main/LICENSE.md)
