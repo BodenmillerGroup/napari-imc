@@ -8,17 +8,17 @@
 
 Imaging Mass Cytometry (IMC) file type support for napari
 
-Open .mcd/.txt files and interactively view panoramas and multi-channel acquisitions using napari
+Open .mcd/.txt files and interactively view panoramas and multi-channel acquisitions co-registered in the machine's coordinate system using napari
 
 ## Requirements
 
 This package requires Python 3.7 or newer.
 
-Python package dependencies are listed in [requirements.txt](https://github.com/BodenmillerGroup/napari-imc/blob/main/requirements.txt).
+Python package dependencies are listed in [requirements.txt](https://github.com/BodenmillerGroup/napari-imc/blob/master/requirements.txt).
 
-Please note that napari is under active development. Currently, this package supports napari 0.4.5 and newer. 
+Please note that napari is under active development. Using virtual environments is strongly encouraged.
 
-Using virtual environments is strongly recommended.
+Currently, this package supports napari 0.4.5 and newer.
 
 ## Installation
 
