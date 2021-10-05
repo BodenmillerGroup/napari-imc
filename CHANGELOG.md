@@ -13,7 +13,7 @@ Minor documentation updates
 
 ## [v0.5.4] - 2021-06-25
 
-napari hub preparations
+Preparations for napari hub
 
 ## [v0.5.3] - 2021-03-15
 
