@@ -1,15 +1,24 @@
-from napari._qt import QHRangeSlider
 from napari.layers.base.base import Blending
 from napari.layers.image.image import Interpolation
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor
 from qtpy.QtWidgets import QComboBox, QFormLayout, QSlider, QWidget
+from superqt import QDoubleRangeSlider
 from typing import Optional, Tuple, TYPE_CHECKING
 
 from napari_imc.widgets._color_picker import ColorPicker
 
 if TYPE_CHECKING:
     from napari_imc.imc_controller import IMCController
+
+
+# https://github.com/napari/napari/blob/77426246caa9db492fbd0645d78be02e4aa4024b/napari/_qt/layer_controls/qt_image_controls_base.py
+class _QDoubleRangeSlider(QDoubleRangeSlider):
+    def mousePressEvent(self, event):
+        if event.button() == Qt.RightButton:
+            self.parent().show_clim_popupup()
+        else:
+            super().mousePressEvent(event)
 
 
 class ChannelControlsWidget(QWidget):
@@ -21,7 +30,7 @@ class ChannelControlsWidget(QWidget):
         self._opacity_slider.setMinimum(0)
         self._opacity_slider.setMaximum(100)
 
-        self._contrast_range_slider = QHRangeSlider(parent=self)
+        self._contrast_range_slider = _QDoubleRangeSlider(Qt.Horizontal, self)
 
         self._gamma_slider = QSlider(Qt.Horizontal, self)
         self._gamma_slider.setMinimum(2)
@@ -51,7 +60,7 @@ class ChannelControlsWidget(QWidget):
                 channel.opacity = value / 100
 
         # noinspection PyUnresolvedReferences
-        @self._contrast_range_slider.valuesChanged.connect
+        @self._contrast_range_slider.valueChanged.connect
         def on_contrast_range_slider_values_changed(values: Tuple[float, float]):
             for channel in self._controller.selected_channels:
                 contrast_limits_range_min = min(
@@ -118,8 +127,8 @@ class ChannelControlsWidget(QWidget):
                     contrast_limits_min = max(contrast_limits_min, contrast_limits_range_min)
                     contrast_limits_max = min(contrast_limits_max, contrast_limits_range_max)
                     self._contrast_range_slider.blockSignals(True)
-                    self._contrast_range_slider.setRange((contrast_limits_range_min, contrast_limits_range_max))
-                    self._contrast_range_slider.setValues((contrast_limits_min, contrast_limits_max))
+                    self._contrast_range_slider.setRange(contrast_limits_range_min, contrast_limits_range_max)
+                    self._contrast_range_slider.setValue((contrast_limits_min, contrast_limits_max))
                     self._contrast_range_slider.blockSignals(False)
 
             mean_gamma = sum(channel.gamma for channel in channels) / len(channels)
