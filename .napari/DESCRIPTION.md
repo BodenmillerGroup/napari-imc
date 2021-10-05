@@ -6,4 +6,4 @@
   - Panoramas (single-channel, color)
   - Acquisitions (multi-channel, grayscale)
 
-All images are loaded co-registered in the machine's global coordinate system.
+All images are loaded co-registered within the machine's coordinate system.

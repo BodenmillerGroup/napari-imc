@@ -16,9 +16,9 @@
     <img src="https://img.shields.io/github/issues-pr/BodenmillerGroup/napari-imc" alt="Pull requests" />
 </a>
 
-Imaging Mass Cytometry (IMC) file type support for napari
+Imaging Mass Cytometry&trade; (IMC&trade;) file type support for napari
 
-Open .mcd/.txt files and interactively view panoramas and multi-channel acquisitions co-registered in the machine's coordinate system using napari
+Load panoramas and multi-channel acquisitions co-registered within the machine's coordinate system from Fluidigm&reg; TXT/MCD&trade; files
 
 ## Installation
 
