@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class IMCFilePanoramaModel(ModelBase, IMCFileTreeItem):
     imc_file_tree_is_checkable = True
 
-    def __init__(self, imc_file: 'IMCFileModel', id_: int, image_type: str,
+    def __init__(self, imc_file: 'IMCFileModel', id_: int, image_type: Optional[str],
                  description: str):
         ModelBase.__init__(self)
         IMCFileTreeItem.__init__(self)
