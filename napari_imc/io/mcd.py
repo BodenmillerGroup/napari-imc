@@ -51,10 +51,10 @@ class McdFileReader(FileReaderBase):
             if acquisition.id == acquisition_id
         )
         channel_index = acquisition.channel_labels.index(channel_label)
-        xs_physical = [acquisition.start_x_um, acquisition.end_x_um]
-        ys_physical = [acquisition.start_y_um, acquisition.end_y_um]
-        x_physical, y_physical = min(xs_physical), min(ys_physical)
-        w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
+        x_physical = min(acquisition.start_x_um, acquisition.end_x_um)
+        y_physical = min(acquisition.start_y_um, acquisition.end_y_um)
+        w_physical = x_physical + acquisition.width_um
+        h_physical = y_physical + acquisition.height_um
         channel_img = self._mcd_file.read_acquisition(acquisition)[channel_index]
         if x_physical != acquisition.start_x_um:
             channel_img = channel_img[:, ::-1]

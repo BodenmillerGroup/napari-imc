@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.1] - 2021-10-19
+
+Fixed bug related to positioning of acquisitions from old MCD files
+
 ## [v0.6.0] - 2021-10-18
 
 Replaced imctools by readimc
@@ -28,6 +32,7 @@ Updated documentation
 Last release before introducing this changelog
 
 
+[v0.6.1]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.5.6...v0.6.0
 [v0.5.6]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.5.4...v0.5.6
 [v0.5.4]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.5.3...v0.5.4
