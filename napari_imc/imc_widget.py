@@ -14,7 +14,7 @@ from napari_imc.widgets import (
 
 class IMCWidget(QWidget):
     NAME = 'Imaging Mass Cytometry'
-    FULL_NAME = f'napari-imc: {NAME}'
+    FULL_NAME = 'Imaging Mass Cytometry'
     AREA = 'right'
     ALLOWED_AREAS = ['left', 'right']
 

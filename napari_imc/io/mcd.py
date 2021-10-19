@@ -32,16 +32,14 @@ class McdFileReader(FileReaderBase):
             for panorama in slide.panoramas
             if panorama.id == panorama_id
         )
-        xs_physical = [panorama.x1_um, panorama.x2_um, panorama.x3_um, panorama.x4_um]
-        ys_physical = [panorama.y1_um, panorama.y2_um, panorama.y3_um, panorama.y4_um]
-        x_physical, y_physical = min(xs_physical), min(ys_physical)
-        w_physical, h_physical = max(xs_physical) - x_physical, max(ys_physical) - y_physical
-        data = self._mcd_file.read_panorama(panorama)
-        if x_physical != panorama.x1_um:
-            data = data[:, ::-1, :]
-        if y_physical != panorama.y1_um:
-            data = data[::-1, :, :]
-        return (x_physical, y_physical, w_physical, h_physical), data
+        x = min(panorama.x1_um, panorama.x2_um, panorama.x3_um, panorama.x4_um)
+        y = min(panorama.y1_um, panorama.y2_um, panorama.y3_um, panorama.y4_um)
+        img = self._mcd_file.read_panorama(panorama)
+        if x != panorama.x1_um:
+            img = img[:, ::-1, :]
+        if y != panorama.y1_um:
+            img = img[::-1, :, :]
+        return (x, y, panorama.width_um, panorama.height_um), img
 
     def read_acquisition(self, acquisition_id: int, channel_label: str) -> Tuple[ImageDimensions, np.ndarray]:
         acquisition = next(
@@ -51,16 +49,14 @@ class McdFileReader(FileReaderBase):
             if acquisition.id == acquisition_id
         )
         channel_index = acquisition.channel_labels.index(channel_label)
-        x_physical = min(acquisition.start_x_um, acquisition.end_x_um)
-        y_physical = min(acquisition.start_y_um, acquisition.end_y_um)
-        w_physical = x_physical + acquisition.width_um
-        h_physical = y_physical + acquisition.height_um
+        x = min(acquisition.start_x_um, acquisition.end_x_um)
+        y = min(acquisition.start_y_um, acquisition.end_y_um)
         channel_img = self._mcd_file.read_acquisition(acquisition)[channel_index]
-        if x_physical != acquisition.start_x_um:
+        if x != acquisition.start_x_um:
             channel_img = channel_img[:, ::-1]
-        if y_physical != acquisition.start_y_um:
+        if y != acquisition.start_y_um:
             channel_img = channel_img[::-1, :]
-        return (x_physical, y_physical, w_physical, h_physical), channel_img
+        return (x, y, acquisition.width_um, acquisition.height_um), channel_img
 
     def __enter__(self) -> 'FileReaderBase':
         self._mcd_file = IMCMcdFile(self._path)
