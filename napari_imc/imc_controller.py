@@ -5,7 +5,7 @@ from napari.layers import Image
 from pathlib import Path
 from typing import Any, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
-from napari_imc.io import ImaxtFileReader, McdFileReader, TxtFileReader
+from napari_imc.io import McdFileReader, TxtFileReader
 from napari_imc.models import ChannelModel, IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
 from napari_imc.models.base import IMCFileTreeItem
 
@@ -16,7 +16,11 @@ if TYPE_CHECKING:
 class IMCController(IMCFileTreeItem):
     PANORAMA_LAYER_TYPE = 'imc_panorama_layer'
     ACQUISITION_LAYER_TYPE = 'imc_acquisition_layer'
-    FILE_READERS = [ImaxtFileReader, McdFileReader, TxtFileReader]
+    FILE_READERS = [
+        # ImaxtFileReader,
+        McdFileReader,
+        TxtFileReader
+    ]
 
     def __init__(self, viewer: Viewer, widget: 'IMCWidget'):
         super(IMCController, self).__init__()
@@ -64,17 +68,16 @@ class IMCController(IMCFileTreeItem):
             self._closed_imc_files_qt_memory_hack.append(imc_file)
 
     def show_imc_file_panorama(self, imc_file_panorama: IMCFilePanoramaModel) -> Optional[Image]:
-        result = None
+        dims, data = None, None
         for file_reader in self.FILE_READERS:
             if file_reader.accepts(imc_file_panorama.imc_file.path):
                 try:
                     with file_reader(imc_file_panorama.imc_file.path) as f:
-                        result = f.read_panorama(imc_file_panorama.id)
+                        dims, data = f.read_panorama(imc_file_panorama.id)
                 except:
                     pass  # ignored intentionally
-        if result is None:
+        if dims is None or data is None:
             return None
-        (x_physical, y_physical, w_physical, h_physical), data = result
         new_layer_index = self._get_next_panorama_layer_index()
         # noinspection PyTypeChecker
         layer = self._viewer.add_image(
@@ -84,8 +87,9 @@ class IMCController(IMCFileTreeItem):
                 self.PANORAMA_LAYER_TYPE: True,
                 'imc_file_panorama': str(imc_file_panorama),
             },
-            scale=(h_physical / data.shape[0], w_physical / data.shape[1]),
-            translate=(y_physical, x_physical),
+            scale=(dims.height / data.shape[0], dims.width / data.shape[1]),
+            translate=(dims.y, dims.x),
+            rotate=dims.rotation,
             opacity=0.5,
         )
         old_layer_index = self.viewer.layers.index(layer)
@@ -152,17 +156,16 @@ class IMCController(IMCFileTreeItem):
 
     def _show_imc_file_acquisition_channel(self, imc_file_acquisition: IMCFileAcquisitionModel,
                                            channel: ChannelModel) -> Optional[Image]:
-        result = None
+        dims, data = None, None
         for file_reader in self.FILE_READERS:
             if file_reader.accepts(imc_file_acquisition.imc_file.path):
                 try:
                     with file_reader(imc_file_acquisition.imc_file.path) as f:
-                        result = f.read_acquisition(imc_file_acquisition.id, channel.label)
+                        dims, data = f.read_acquisition(imc_file_acquisition.id, channel.label)
                 except:
                     pass  # ignored intentionally
-        if result is None:
+        if dims is None or data is None:
             return None
-        (x_physical, y_physical, w_physical, h_physical), data = result
         if channel.contrast_limits is None:
             channel.contrast_limits = (0, np.amax(data))
         new_layer_index = self._get_next_acquisition_layer_index()
@@ -179,8 +182,9 @@ class IMCController(IMCFileTreeItem):
                 'imc_file_acquisition': str(imc_file_acquisition),
                 'channel': str(channel),
             },
-            scale=(h_physical / data.shape[0], w_physical / data.shape[1]),
-            translate=(y_physical, x_physical),
+            scale=(dims.height / data.shape[0], dims.width / data.shape[1]),
+            translate=(dims.y, dims.x),
+            rotate=dims.rotation,
             opacity=channel.opacity,
             blending=channel.blending,
         )

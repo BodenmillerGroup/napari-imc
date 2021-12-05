@@ -2,7 +2,7 @@ import numpy as np
 
 from napari_imc.io.base import FileReaderBase, ImageDimensions
 from pathlib import Path
-from readimc import IMCMcdFile
+from readimc import MCDFile
 from typing import List, Optional, Tuple, Union
 
 from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
@@ -11,7 +11,7 @@ from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePano
 class McdFileReader(FileReaderBase):
     def __init__(self, path: Union[str, Path]):
         super(McdFileReader, self).__init__(path)
-        self._mcd_file: Optional[IMCMcdFile] = None
+        self._mcd_file: Optional[MCDFile] = None
 
     def _get_imc_file_panoramas(self, imc_file: IMCFileModel) -> List[IMCFilePanoramaModel]:
         return [
@@ -32,14 +32,10 @@ class McdFileReader(FileReaderBase):
             for panorama in slide.panoramas
             if panorama.id == panorama_id
         )
-        x = min(panorama.x1_um, panorama.x2_um, panorama.x3_um, panorama.x4_um)
-        y = min(panorama.y1_um, panorama.y2_um, panorama.y3_um, panorama.y4_um)
-        img = self._mcd_file.read_panorama(panorama)
-        if x != panorama.x1_um:
-            img = img[:, ::-1, :]
-        if y != panorama.y1_um:
-            img = img[::-1, :, :]
-        return (x, y, panorama.width_um, panorama.height_um), img
+        img = self._mcd_file.read_panorama(panorama)[::-1, :]
+        rotation = -np.arctan2(panorama.points_um[1][1] - panorama.points_um[0][1], panorama.points_um[1][0] - panorama.points_um[0][0])
+        dims = ImageDimensions(panorama.points_um[0][0], panorama.points_um[0][1] - panorama.height_um, panorama.width_um, panorama.height_um, rotation=rotation)
+        return dims, img
 
     def read_acquisition(self, acquisition_id: int, channel_label: str) -> Tuple[ImageDimensions, np.ndarray]:
         acquisition = next(
@@ -48,18 +44,13 @@ class McdFileReader(FileReaderBase):
             for acquisition in slide.acquisitions
             if acquisition.id == acquisition_id
         )
-        channel_index = acquisition.channel_labels.index(channel_label)
-        x = min(acquisition.start_x_um, acquisition.end_x_um)
-        y = min(acquisition.start_y_um, acquisition.end_y_um)
-        channel_img = self._mcd_file.read_acquisition(acquisition)[channel_index]
-        if x != acquisition.start_x_um:
-            channel_img = channel_img[:, ::-1]
-        if y != acquisition.start_y_um:
-            channel_img = channel_img[::-1, :]
-        return (x, y, acquisition.width_um, acquisition.height_um), channel_img
+        img = self._mcd_file.read_acquisition(acquisition)[acquisition.channel_labels.index(channel_label), ::-1, :]
+        rotation = -np.arctan2(acquisition.roi_points_um[1][1] - acquisition.roi_points_um[0][1], acquisition.roi_points_um[1][0] - acquisition.roi_points_um[0][0])
+        dims = ImageDimensions(acquisition.roi_points_um[0][0], acquisition.roi_points_um[0][1] - acquisition.height_um, acquisition.width_um, acquisition.height_um, rotation=rotation)
+        return dims, img
 
     def __enter__(self) -> 'FileReaderBase':
-        self._mcd_file = IMCMcdFile(self._path)
+        self._mcd_file = MCDFile(self._path)
         self._mcd_file.open()
         return self
 

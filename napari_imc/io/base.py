@@ -2,12 +2,18 @@ import numpy as np
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, NamedTuple, Tuple, Union
 
 from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
 from napari_imc.models.base import IMCFileTreeItem
 
-ImageDimensions = Tuple[float, float, float, float]
+
+class ImageDimensions(NamedTuple):
+    x: float
+    y: float
+    width: float
+    height: float
+    rotation: float = 0.0
 
 
 class FileReaderBase:

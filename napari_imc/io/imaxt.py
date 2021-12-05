@@ -33,6 +33,8 @@ class ImaxtFileReader(FileReaderBase):
         ]
 
     def read_panorama(self, panorama_id: int) -> Tuple[ImageDimensions, np.ndarray]:
+        # FIXME change to new ImageDimensions model
+        raise NotImplementedError()
         panorama = next(filter(lambda x: x['id'] == panorama_id, self._zarr_group.attrs['meta']['panoramas']))
         data = imread(self._path / Path(panorama['file']))
         xs_physical = [x for x, y in panorama['slide_pos_um']]
@@ -46,6 +48,8 @@ class ImaxtFileReader(FileReaderBase):
         return (x_physical, y_physical, w_physical, h_physical), data
 
     def read_acquisition(self, acquisition_id: int, channel_label: str) -> Tuple[ImageDimensions, np.ndarray]:
+        # FIXME change to new ImageDimensions model
+        raise NotImplementedError()
         acquisition = next(filter(lambda x: x['id'] == acquisition_id, self._zarr_group.attrs['meta']['acquisitions']))
         channel_index = [channel['target'] for channel in acquisition['channels']].index(channel_label)
         xs_physical = [acquisition['roi_start_pos_um'][0] / 1000, acquisition['roi_end_pos_um'][0]]

@@ -3,7 +3,7 @@ import re
 
 from napari_imc.io.base import FileReaderBase, ImageDimensions
 from pathlib import Path
-from readimc import IMCTxtFile
+from readimc import TXTFile
 from typing import List, Optional, Tuple, Union
 
 from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePanoramaModel
@@ -12,7 +12,7 @@ from napari_imc.models import IMCFileModel, IMCFileAcquisitionModel, IMCFilePano
 class TxtFileReader(FileReaderBase):
     def __init__(self, path: Union[str, Path]):
         super(TxtFileReader, self).__init__(path)
-        self._txt_file: Optional[IMCTxtFile] = None
+        self._txt_file: Optional[TXTFile] = None
 
     def _get_imc_file_panoramas(self, imc_file: IMCFileModel) -> List[IMCFilePanoramaModel]:
         return []
@@ -29,14 +29,12 @@ class TxtFileReader(FileReaderBase):
         raise RuntimeError('This operation is not supported')
 
     def read_acquisition(self, acquisition_id: int, channel_label: str) -> Tuple[ImageDimensions, np.ndarray]:
-        channel_index = self._txt_file.channel_labels.index(channel_label)
-        channel_img = self._txt_file.read_acquisition()[channel_index]
-        x_physical, y_physical = 0, 0
-        h_physical, w_physical = channel_img.shape
-        return (x_physical, y_physical, w_physical, h_physical), channel_img
+        img = self._txt_file.read_acquisition()[self._txt_file.channel_labels.index(channel_label), ::-1, :]
+        dims = ImageDimensions(0, 0, img.shape[1], img.shape[0])
+        return dims, img
 
     def __enter__(self) -> 'FileReaderBase':
-        self._txt_file = IMCTxtFile(self._path)
+        self._txt_file = TXTFile(self._path)
         self._txt_file.open()
         return self
 
