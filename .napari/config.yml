@@ -1,0 +1,6 @@
+
+# Add labels from the EDAM Bioimaging ontology
+labels:
+  ontology: EDAM-BIOIMAGING:alpha06
+  terms:
+  - Multi-channel image
