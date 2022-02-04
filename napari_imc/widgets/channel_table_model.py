@@ -3,14 +3,16 @@ from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex, QObject
 from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from napari_imc.imc_controller import IMCController
+    from ..imc_controller import IMCController
 
 
 class ChannelTableModel(QAbstractTableModel):
     CHECK_COLUMN = 0
     LABEL_COLUMN = 1
 
-    def __init__(self, controller: 'IMCController', parent: Optional[QObject] = None):
+    def __init__(
+        self, controller: "IMCController", parent: Optional[QObject] = None
+    ) -> None:
         super(ChannelTableModel, self).__init__(parent)
         self._controller = controller
 
@@ -23,34 +25,52 @@ class ChannelTableModel(QAbstractTableModel):
     def data(self, index: QModelIndex, role: Optional[int] = None) -> Any:
         if index.isValid():
             channel = self._controller.channels[index.row()]
-            if index.column() == self.CHECK_COLUMN and role == Qt.CheckStateRole:
-                return Qt.Checked if channel.is_shown else Qt.Unchecked
-            if index.column() == self.LABEL_COLUMN and role == Qt.DisplayRole:
+            if (
+                index.column() == self.CHECK_COLUMN
+                and role == Qt.ItemDataRole.CheckStateRole
+            ):
+                if channel.is_shown:
+                    return Qt.CheckState.Checked
+                return Qt.CheckState.Unchecked
+            if (
+                index.column() == self.LABEL_COLUMN
+                and role == Qt.ItemDataRole.DisplayRole
+            ):
                 return channel.label
         return None
 
-    def setData(self, index: QModelIndex, value: Any, role: Optional[int] = None) -> bool:
-        if index.isValid() and index.column() == self.CHECK_COLUMN and role == Qt.CheckStateRole:
+    def setData(
+        self, index: QModelIndex, value: Any, role: Optional[int] = None
+    ) -> bool:
+        if (
+            index.isValid()
+            and index.column() == self.CHECK_COLUMN
+            and role == Qt.ItemDataRole.CheckStateRole
+        ):
             # channel is set to shown/hidden in dataChanged event handler
-            # noinspection PyUnresolvedReferences
-            self.dataChanged.emit(index, index, [Qt.CheckStateRole])
+            self.dataChanged.emit(index, index, [Qt.ItemDataRole.CheckStateRole])
             return True
         return super(ChannelTableModel, self).setData(index, value, role=role)
 
     def flags(self, index: QModelIndex) -> int:
         if not index.isValid():
-            return Qt.NoItemFlags
+            return Qt.ItemFlag.NoItemFlags
         flags = super(ChannelTableModel, self).flags(index)
         if index.column() == self.CHECK_COLUMN:
-            flags |= Qt.ItemIsUserCheckable
+            flags |= Qt.ItemFlag.ItemIsUserCheckable
         return flags
 
-    def headerData(self, section: int, orientation: int, role: Optional[int] = None) -> Any:
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+    def headerData(
+        self, section: int, orientation: int, role: Optional[int] = None
+    ) -> Any:
+        if (
+            orientation == Qt.Orientation.Horizontal
+            and role == Qt.ItemDataRole.DisplayRole
+        ):
             if section == self.CHECK_COLUMN:
-                return ''
+                return ""
             if section == self.LABEL_COLUMN:
-                return 'Channel'
+                return "Channel"
         return None
 
     @contextmanager

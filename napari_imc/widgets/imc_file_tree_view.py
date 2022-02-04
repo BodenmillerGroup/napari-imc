@@ -2,19 +2,18 @@ from qtpy.QtCore import Qt, QModelIndex, QObject, QPoint, Signal
 from qtpy.QtWidgets import QMenu, QStyle, QTreeView, QWidget
 from typing import Optional
 
-from napari_imc.models import IMCFileModel
+from ..models import IMCFileModel
 
 
 class IMCFileTreeView(QTreeView):
     class Events(QObject):
         imc_file_closed = Signal(IMCFileModel)
 
-    def __init__(self, parent: Optional[QWidget] = None):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super(IMCFileTreeView, self).__init__(parent)
         self.events = IMCFileTreeView.Events(self)
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
-        # noinspection PyUnresolvedReferences
         @self.customContextMenuRequested.connect
         def on_custom_context_menu_requested(pos: QPoint):
             index: QModelIndex = self.indexAt(pos)
@@ -22,8 +21,11 @@ class IMCFileTreeView(QTreeView):
                 item = index.internalPointer()
                 if isinstance(item, IMCFileModel):
                     menu = QMenu()
-                    close_action_icon = self.window().style().standardIcon(QStyle.SP_DialogCloseButton, widget=self)
-                    close_action = menu.addAction(close_action_icon, 'Close')
+                    style = self.window().style()
+                    close_action_icon = style.standardIcon(
+                        QStyle.StandardPixmap.SP_DialogCloseButton, widget=self
+                    )
+                    close_action = menu.addAction(close_action_icon, "Close")
                     if menu.exec(self.mapToGlobal(pos)) == close_action:
                         self.events.imc_file_closed.emit(item)
 

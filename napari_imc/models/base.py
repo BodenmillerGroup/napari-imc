@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 class IMCFileTreeItem:
     imc_file_tree_is_checkable = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._deleted = False
 
     @property
@@ -15,12 +15,12 @@ class IMCFileTreeItem:
 
     @property
     @abstractmethod
-    def _imc_file_tree_parent(self) -> Optional['IMCFileTreeItem']:
+    def _imc_file_tree_parent(self) -> Optional["IMCFileTreeItem"]:
         pass
 
     @property
     @abstractmethod
-    def _imc_file_tree_children(self) -> List['IMCFileTreeItem']:
+    def _imc_file_tree_children(self) -> List["IMCFileTreeItem"]:
         pass
 
     @property
@@ -30,13 +30,13 @@ class IMCFileTreeItem:
         return self._imc_file_tree_data
 
     @property
-    def imc_file_tree_parent(self) -> Optional['IMCFileTreeItem']:
+    def imc_file_tree_parent(self) -> Optional["IMCFileTreeItem"]:
         if self._deleted:
             return None
         return self._imc_file_tree_parent
 
     @property
-    def imc_file_tree_children(self) -> List['IMCFileTreeItem']:
+    def imc_file_tree_children(self) -> List["IMCFileTreeItem"]:
         if self._deleted:
             return []
         return self._imc_file_tree_children

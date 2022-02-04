@@ -1,6 +1,6 @@
 **Supported file formats**:
- - Fluidigm&reg; MCD&trade;
- - Fluidigm&reg; TXT
+ - Fluidigm MCD
+ - Fluidigm TXT
 
 **Supported image types**:
   - Panoramas (single-channel, color)

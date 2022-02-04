@@ -3,17 +3,24 @@ from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 from napari.layers import Image
 from napari.utils import Colormap
 
-from napari_imc.models.base import ModelBase
+from .base import ModelBase
 
 if TYPE_CHECKING:
-    from napari_imc.models.imc_file_acquisition import IMCFileAcquisitionModel
+    from .imc_file_acquisition import IMCFileAcquisitionModel
 
 Color = Tuple[float, float, float, float]
 
 
 class ChannelModel(ModelBase):
-    def __init__(self, label: str, opacity: float = 1., gamma: float = 1., color: Color = (1., 1., 1., 1.),
-                 blending: str = 'additive', interpolation: str = 'nearest'):
+    def __init__(
+        self,
+        label: str,
+        opacity: float = 1.0,
+        gamma: float = 1.0,
+        color: Color = (1.0, 1.0, 1.0, 1.0),
+        blending: str = "additive",
+        interpolation: str = "nearest",
+    ) -> None:
         ModelBase.__init__(self)
         self._label = label
         self._opacity = opacity
@@ -22,8 +29,10 @@ class ChannelModel(ModelBase):
         self._blending = blending
         self._interpolation = interpolation
         self._contrast_limits = None
-        self._loaded_imc_file_acquisitions: List['IMCFileAcquisitionModel'] = []
-        self._shown_imc_file_acquisition_layers: Dict['IMCFileAcquisitionModel', Image] = {}
+        self._loaded_imc_file_acquisitions: List["IMCFileAcquisitionModel"] = []
+        self._shown_imc_file_acquisition_layers: Dict[
+            "IMCFileAcquisitionModel", Image
+        ] = {}
         self._is_shown = False
 
     @property
@@ -91,18 +100,22 @@ class ChannelModel(ModelBase):
             layer.interpolation = interpolation
 
     @property
-    def loaded_imc_file_acquisitions(self) -> List['IMCFileAcquisitionModel']:
+    def loaded_imc_file_acquisitions(self) -> List["IMCFileAcquisitionModel"]:
         return self._loaded_imc_file_acquisitions
 
     @property
-    def shown_imc_file_acquisition_layers(self) -> Dict['IMCFileAcquisitionModel', Image]:
+    def shown_imc_file_acquisition_layers(
+        self,
+    ) -> Dict["IMCFileAcquisitionModel", Image]:
         return self._shown_imc_file_acquisition_layers
 
     @property
     def is_shown(self) -> bool:
         return self._is_shown
 
-    def set_shown(self, imc_file_acquisition_layers: Dict['IMCFileAcquisitionModel', Image]):
+    def set_shown(
+        self, imc_file_acquisition_layers: Dict["IMCFileAcquisitionModel", Image]
+    ):
         self._shown_imc_file_acquisition_layers.clear()
         self._shown_imc_file_acquisition_layers.update(imc_file_acquisition_layers)
         self._is_shown = True
@@ -112,7 +125,11 @@ class ChannelModel(ModelBase):
         self._is_shown = False
 
     def create_colormap(self) -> Colormap:
-        return Colormap(name='IMC', colors=[[0., 0., 0., self.color[-1]], list(self._color)], interpolation='linear')
+        return Colormap(
+            name="IMC",
+            colors=[[0.0, 0.0, 0.0, self.color[-1]], list(self._color)],
+            interpolation="linear",
+        )
 
     def __eq__(self, other):
         if other is None or not isinstance(other, ChannelModel):

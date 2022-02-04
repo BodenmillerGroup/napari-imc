@@ -1,17 +1,22 @@
 from napari.layers import Image
 from typing import Any, List, Optional, TYPE_CHECKING
 
-from napari_imc.models.base import IMCFileTreeItem, ModelBase
+from .base import IMCFileTreeItem, ModelBase
 
 if TYPE_CHECKING:
-    from napari_imc.models.imc_file import IMCFileModel
+    from .imc_file import IMCFileModel
 
 
 class IMCFilePanoramaModel(ModelBase, IMCFileTreeItem):
     imc_file_tree_is_checkable = True
 
-    def __init__(self, imc_file: 'IMCFileModel', id_: int, image_type: Optional[str],
-                 description: str):
+    def __init__(
+        self,
+        imc_file: "IMCFileModel",
+        id_: int,
+        image_type: Optional[str],
+        description: str,
+    ) -> None:
         ModelBase.__init__(self)
         IMCFileTreeItem.__init__(self)
         self._imc_file = imc_file
@@ -22,7 +27,7 @@ class IMCFilePanoramaModel(ModelBase, IMCFileTreeItem):
         self._is_shown = False
 
     @property
-    def imc_file(self) -> 'IMCFileModel':
+    def imc_file(self) -> "IMCFileModel":
         return self._imc_file
 
     @property
@@ -47,7 +52,7 @@ class IMCFilePanoramaModel(ModelBase, IMCFileTreeItem):
 
     @property
     def _imc_file_tree_data(self) -> List[Any]:
-        return [self.is_shown, f'P{self.id:02d}', self.description]
+        return [self.is_shown, f"P{self.id:02d}", self.description]
 
     @property
     def _imc_file_tree_parent(self) -> Optional[IMCFileTreeItem]:
@@ -78,4 +83,4 @@ class IMCFilePanoramaModel(ModelBase, IMCFileTreeItem):
         return hash((self._imc_file, self._id))
 
     def __repr__(self):
-        return f'{self._imc_file} P{self._id:02d}'
+        return f"{self._imc_file} P{self._id:02d}"

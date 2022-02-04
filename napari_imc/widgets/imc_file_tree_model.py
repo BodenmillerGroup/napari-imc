@@ -2,10 +2,10 @@ from contextlib import contextmanager
 from qtpy.QtCore import Qt, QAbstractItemModel, QModelIndex, QObject
 from typing import Any, Optional, TYPE_CHECKING
 
-from napari_imc.models.base import IMCFileTreeItem
+from ..models.base import IMCFileTreeItem
 
 if TYPE_CHECKING:
-    from napari_imc.imc_controller import IMCController
+    from ..imc_controller import IMCController
 
 
 class IMCFileTreeModel(QAbstractItemModel):
@@ -13,11 +13,15 @@ class IMCFileTreeModel(QAbstractItemModel):
     ID_COLUMN = 1
     DESCRIPTION_COLUMN = 2
 
-    def __init__(self, controller: 'IMCController', parent: Optional[QObject] = None):
+    def __init__(
+        self, controller: "IMCController", parent: Optional[QObject] = None
+    ) -> None:
         super(IMCFileTreeModel, self).__init__(parent)
         self._controller = controller
 
-    def index(self, row: int, column: int, parent: QModelIndex = None, **kwargs) -> QModelIndex:
+    def index(
+        self, row: int, column: int, parent: QModelIndex = None, **kwargs
+    ) -> QModelIndex:
         if self.hasIndex(row, column, parent=parent):
             if parent is not None and parent.isValid():
                 parent_item: IMCFileTreeItem = parent.internalPointer()
@@ -33,7 +37,11 @@ class IMCFileTreeModel(QAbstractItemModel):
         if index is not None and index.isValid():
             parent_item: IMCFileTreeItem = index.internalPointer().imc_file_tree_parent
             if parent_item is not None and parent_item.imc_file_tree_parent is not None:
-                parent_row = parent_item.imc_file_tree_parent.imc_file_tree_children.index(parent_item)
+                parent_row = (
+                    parent_item.imc_file_tree_parent.imc_file_tree_children.index(
+                        parent_item
+                    )
+                )
                 return self.createIndex(parent_row, 0, parent_item)
         return QModelIndex()
 
@@ -50,20 +58,32 @@ class IMCFileTreeModel(QAbstractItemModel):
     def data(self, index: QModelIndex, role: Optional[int] = None) -> Any:
         if index.isValid():
             item: IMCFileTreeItem = index.internalPointer()
-            if role == Qt.DisplayRole and (index.column() != self.CHECK_COLUMN or not item.imc_file_tree_is_checkable):
+            if role == Qt.ItemDataRole.DisplayRole and (
+                index.column() != self.CHECK_COLUMN
+                or not item.imc_file_tree_is_checkable
+            ):
                 return item.imc_file_tree_data[index.column()]
-            if role == Qt.CheckStateRole and (index.column() == self.CHECK_COLUMN and item.imc_file_tree_is_checkable):
-                return Qt.Checked if item.imc_file_tree_is_checked else Qt.Unchecked
+            if role == Qt.ItemDataRole.CheckStateRole and (
+                index.column() == self.CHECK_COLUMN and item.imc_file_tree_is_checkable
+            ):
+                if item.imc_file_tree_is_checked:
+                    return Qt.CheckState.Checked
+                return Qt.CheckState.Unchecked
         return None
 
-    def setData(self, index: QModelIndex, value: Any, role: Optional[int] = None) -> bool:
-        if index.isValid() and role == Qt.CheckStateRole and index.column() == self.CHECK_COLUMN:
+    def setData(
+        self, index: QModelIndex, value: Any, role: Optional[int] = None
+    ) -> bool:
+        if (
+            index.isValid()
+            and role == Qt.ItemDataRole.CheckStateRole
+            and index.column() == self.CHECK_COLUMN
+        ):
             item: IMCFileTreeItem = index.internalPointer()
             if item.imc_file_tree_is_checkable:
-                # imc_file_acquisition is set to loaded/unloaded in dataChanged event handler
-                # imc_file_panorama is set to shown/hidden in dataChanged event handler
-                # noinspection PyUnresolvedReferences
-                self.dataChanged.emit(index, index, [Qt.CheckStateRole])
+                # imc_file_acquisition is set to loaded/unloaded in dataChanged
+                # imc_file_panorama is set to shown/hidden in dataChanged
+                self.dataChanged.emit(index, index, [Qt.ItemDataRole.CheckStateRole])
                 return True
         return super(IMCFileTreeModel, self).setData(index, value, role=role)
 
@@ -73,22 +93,29 @@ class IMCFileTreeModel(QAbstractItemModel):
         flags = super(IMCFileTreeModel, self).flags(index)
         item: IMCFileTreeItem = index.internalPointer()
         if index.column() == self.CHECK_COLUMN and item.imc_file_tree_is_checkable:
-            flags |= Qt.ItemIsUserCheckable
+            flags |= Qt.ItemFlag.ItemIsUserCheckable
         return flags
 
-    def headerData(self, section: int, orientation: int, role: Optional[int] = None) -> Any:
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+    def headerData(
+        self, section: int, orientation: int, role: Optional[int] = None
+    ) -> Any:
+        if (
+            orientation == Qt.Orientation.Horizontal
+            and role == Qt.ItemDataRole.DisplayRole
+        ):
             if section == self.CHECK_COLUMN:
-                return ''
+                return ""
             if section == self.ID_COLUMN:
-                return 'ID'
+                return "ID"
             if section == self.DESCRIPTION_COLUMN:
-                return 'Description'
+                return "Description"
         return None
 
     @contextmanager
     def append_imc_file(self):
-        self.beginInsertRows(self.createIndex(0, 0, self._controller), self.rowCount(), self.rowCount())
+        self.beginInsertRows(
+            self.createIndex(0, 0, self._controller), self.rowCount(), self.rowCount()
+        )
         yield
         self.endInsertRows()
 

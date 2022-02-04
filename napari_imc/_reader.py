@@ -2,8 +2,8 @@ from napari import Viewer
 from napari_plugin_engine import napari_hook_implementation
 from typing import Optional
 
-from napari_imc.imc_widget import IMCWidget
-from napari_imc.imc_controller import IMCController
+from .imc_widget import IMCWidget
+from .imc_controller import IMCController
 
 
 @napari_hook_implementation
@@ -25,7 +25,7 @@ def reader_function(path):
             imc_file = imc_widget.controller.open_imc_file(path)
             if imc_file is not None:
                 for panorama in imc_file.panoramas:
-                    if panorama.image_type == 'Imported':
+                    if panorama.image_type == "Imported":
                         imc_widget.controller.show_imc_file_panorama(panorama)
         return [(None,)]  # empty layer sentinel
     return None
@@ -34,9 +34,10 @@ def reader_function(path):
 # TODO https://github.com/napari/napari/issues/2202
 def _get_viewer() -> Optional[Viewer]:
     import inspect
+
     frame = inspect.currentframe().f_back
     while frame:
-        instance = frame.f_locals.get('self')
+        instance = frame.f_locals.get("self")
         if instance is not None and isinstance(instance, Viewer):
             return instance
         frame = frame.f_back
@@ -44,13 +45,16 @@ def _get_viewer() -> Optional[Viewer]:
 
 
 def _get_imc_widget(viewer: Viewer) -> IMCWidget:
-    # noinspection PyProtectedMember
     # TODO https://github.com/napari/napari/issues/2203
     dock_widget = viewer.window._dock_widgets.get(IMCWidget.FULL_NAME)
     if dock_widget is not None:
         imc_widget = dock_widget.widget()
     else:
-        imc_widget = IMCWidget(napari_viewer=viewer, parent=viewer.window.qt_viewer)
-        viewer.window.add_dock_widget(imc_widget, name=IMCWidget.FULL_NAME, area=IMCWidget.AREA,
-                                      allowed_areas=IMCWidget.ALLOWED_AREAS)
+        imc_widget = IMCWidget(napari_viewer=viewer)
+        viewer.window.add_dock_widget(
+            imc_widget,
+            name=IMCWidget.FULL_NAME,
+            area=IMCWidget.AREA,
+            allowed_areas=IMCWidget.ALLOWED_AREAS,
+        )
     return imc_widget

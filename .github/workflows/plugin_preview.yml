@@ -1,5 +1,5 @@
-name: napari hub Preview Page # we use this name to find your preview page artifact, so don't change it!
-# For more info on this action, see https://github.com/chanzuckerberg/napari-hub-preview-action/blob/main/action.yml
+# we use this name to find your preview page artifact, so don't change it!
+name: napari hub Preview Page
 
 on:
   pull_request:

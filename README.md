@@ -16,15 +16,19 @@
     <img src="https://img.shields.io/github/issues-pr/BodenmillerGroup/napari-imc" alt="Pull requests" />
 </a>
 
-Imaging Mass Cytometry&trade; (IMC&trade;) file type support for napari
+Imaging Mass Cytometry (IMC) file type support for napari
 
-Load panoramas and multi-channel acquisitions co-registered within the machine's coordinate system from Fluidigm&reg; TXT/MCD&trade; files
+Load panoramas and multi-channel acquisitions co-registered within the machine's coordinate system from Fluidigm TXT/MCD files
 
 ## Installation
 
 You can install napari-imc via [pip](https://pypi.org/project/pip/):
 
     pip install napari-imc
+
+Alternatively, you can install napari-imc via [conda](https://conda.io/):
+
+    conda install -c conda-forge napari-imc
 
 ## Authors
 

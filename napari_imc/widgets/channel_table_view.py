@@ -4,10 +4,10 @@ from typing import Optional
 
 
 class ChannelTableView(QTableView):
-    def __init__(self, parent: Optional[QWidget] = None):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super(ChannelTableView, self).__init__(parent)
         self.horizontalHeader().setStretchLastSection(True)
-        self.setSelectionBehavior(QTableView.SelectRows)
+        self.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.setShowGrid(False)
 
     def rowsInserted(self, parent: QModelIndex, first: int, last: int):
