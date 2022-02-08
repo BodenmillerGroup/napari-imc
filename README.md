@@ -29,6 +29,25 @@ You can install napari-imc via [pip](https://pypi.org/project/pip/):
 Alternatively, you can install napari-imc via [conda](https://conda.io/):
 
     conda install -c conda-forge napari-imc
+    
+## Usage
+
+Simply open your Fluidigm TXT/MCD file using napari.
+
+## Citing
+
+Please cite the following paper when using napari-imc in your work:
+
+> Windhager J, Bodenmiller B, Eling N (2021). An end-to-end workflow for multiplexed image processing and analysis. bioRxiv. doi: https://doi.org/10.1101/2021.11.12.468357.
+
+    @article{Windhager2021,
+      author = {Windhager, Jonas and Bodenmiller, Bernd and Eling, Nils},
+      title = {An end-to-end workflow for multiplexed image processing and analysis},
+      year = {2021},
+      doi = {10.1101/2021.11.12.468357},
+      URL = {https://www.biorxiv.org/content/early/2021/11/13/2021.11.12.468357},
+      journal = {bioRxiv}
+    }
 
 ## Authors
 
