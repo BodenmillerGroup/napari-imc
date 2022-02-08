@@ -34,7 +34,11 @@ Alternatively, you can install napari-imc via [conda](https://conda.io/):
 
 Simply open your Fluidigm TXT/MCD file using napari.
 
-## Citing
+## Authors
+
+Created and maintained by Jonas Windhager [jonas.windhager@uzh.ch](mailto:jonas.windhager@uzh.ch)
+
+## Citation
 
 Please cite the following paper when using napari-imc in your work:
 
@@ -48,10 +52,6 @@ Please cite the following paper when using napari-imc in your work:
       URL = {https://www.biorxiv.org/content/early/2021/11/13/2021.11.12.468357},
       journal = {bioRxiv}
     }
-
-## Authors
-
-Created and maintained by Jonas Windhager [jonas.windhager@uzh.ch](mailto:jonas.windhager@uzh.ch)
 
 ## Contributing
 
