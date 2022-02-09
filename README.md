@@ -25,10 +25,16 @@ Load panoramas and multi-channel acquisitions co-registered within the machine's
 You can install napari-imc via [pip](https://pypi.org/project/pip/):
 
     pip install napari-imc
-
+    
 Alternatively, you can install napari-imc via [conda](https://conda.io/):
 
     conda install -c conda-forge napari-imc
+    
+For example, to install napari and napari-imc in a fresh conda environment:
+
+    conda create -n napari-imc python=3.9
+    conda activate napari-imc
+    pip install "napari[all]" napari-imc
     
 ## Usage
 
