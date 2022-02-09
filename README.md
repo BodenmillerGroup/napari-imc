@@ -30,7 +30,7 @@ Alternatively, you can install napari-imc via [conda](https://conda.io/):
 
     conda install -c conda-forge napari-imc
     
-For example, to install napari and napari-imc in a fresh conda environment:
+For example, to install napari and napari-imc in a fresh conda environment using pip:
 
     conda create -n napari-imc python=3.9
     conda activate napari-imc
