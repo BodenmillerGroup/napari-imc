@@ -1,0 +1,17 @@
+name: napari-imc
+schema_version: 0.1.0
+contributions:
+  commands:
+  - id: napari-imc.IMCWidget
+    title: Create Imaging Mass Cytometry
+    python_name: napari_imc:IMCWidget
+  - id: napari-imc.get_reader
+    title: Read Imaging Mass Cytometry (IMC) files using readimc
+    python_name: napari_imc:napari_get_reader
+  readers:
+  - command: napari-imc.get_reader
+    filename_patterns: ["*.mcd", "*.txt"]
+    accepts_directories: false
+  widgets:
+  - command: napari-imc.IMCWidget
+    display_name: Imaging Mass Cytometry

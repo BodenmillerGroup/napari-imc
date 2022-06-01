@@ -1,12 +1,11 @@
-from napari import Viewer
-from napari_plugin_engine import napari_hook_implementation
 from typing import Optional
 
-from .imc_widget import IMCWidget
+from napari.viewer import Viewer
+
 from .imc_controller import IMCController
+from .imc_widget import IMCWidget
 
 
-@napari_hook_implementation
 def napari_get_reader(path):
     if isinstance(path, list):
         if any(not IMCController.is_imc_file(p) for p in path):
@@ -46,15 +45,10 @@ def _get_viewer() -> Optional[Viewer]:
 
 def _get_imc_widget(viewer: Viewer) -> IMCWidget:
     # TODO https://github.com/napari/napari/issues/2203
-    dock_widget = viewer.window._dock_widgets.get(IMCWidget.FULL_NAME)
+    dock_widget = viewer.window._dock_widgets.get("Imaging Mass Cytometry")
     if dock_widget is not None:
         imc_widget = dock_widget.widget()
     else:
         imc_widget = IMCWidget(napari_viewer=viewer)
-        viewer.window.add_dock_widget(
-            imc_widget,
-            name=IMCWidget.FULL_NAME,
-            area=IMCWidget.AREA,
-            allowed_areas=IMCWidget.ALLOWED_AREAS,
-        )
+        viewer.window.add_dock_widget(imc_widget, name="Imaging Mass Cytometry")
     return imc_widget

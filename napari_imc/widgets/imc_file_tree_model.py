@@ -1,6 +1,7 @@
 from contextlib import contextmanager
-from qtpy.QtCore import Qt, QAbstractItemModel, QModelIndex, QObject
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
+from qtpy.QtCore import QAbstractItemModel, QModelIndex, QObject, Qt
 
 from ..models.base import IMCFileTreeItem
 

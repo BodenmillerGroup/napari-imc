@@ -1,10 +1,11 @@
+from typing import TYPE_CHECKING, Optional, Tuple
+
 from napari.layers.base.base import Blending
 from napari.layers.image.image import Interpolation
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor
 from qtpy.QtWidgets import QComboBox, QFormLayout, QSlider, QWidget
 from superqt import QDoubleRangeSlider
-from typing import Optional, Tuple, TYPE_CHECKING
 
 from ._color_picker import ColorPicker
 

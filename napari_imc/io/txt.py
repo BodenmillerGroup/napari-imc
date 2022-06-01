@@ -1,16 +1,12 @@
-import numpy as np
 import re
-
 from pathlib import Path
-from readimc import TXTFile
 from typing import List, Optional, Tuple, Union
 
+import numpy as np
+from readimc import TXTFile
+
 from ..io.base import FileReaderBase, ImageDimensions
-from ..models import (
-    IMCFileModel,
-    IMCFileAcquisitionModel,
-    IMCFilePanoramaModel,
-)
+from ..models import IMCFileAcquisitionModel, IMCFileModel, IMCFilePanoramaModel
 
 
 class TxtFileReader(FileReaderBase):

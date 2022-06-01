@@ -1,20 +1,17 @@
+from typing import Optional
+
 from napari import Viewer
 from qtpy.QtCore import (
-    Qt,
     QItemSelection,
     QItemSelectionModel,
     QModelIndex,
     QSortFilterProxyModel,
+    Qt,
 )
 from qtpy.QtWidgets import QSizePolicy, QSplitter, QStackedWidget, QVBoxLayout, QWidget
-from typing import Optional
 
 from .imc_controller import IMCController
-from .models import (
-    IMCFileModel,
-    IMCFileAcquisitionModel,
-    IMCFilePanoramaModel,
-)
+from .models import IMCFileAcquisitionModel, IMCFileModel, IMCFilePanoramaModel
 from .widgets import (
     ChannelControlsWidget,
     ChannelTableModel,
@@ -25,11 +22,6 @@ from .widgets import (
 
 
 class IMCWidget(QWidget):
-    NAME = "Imaging Mass Cytometry"
-    FULL_NAME = "Imaging Mass Cytometry"
-    AREA = "right"
-    ALLOWED_AREAS = ["left", "right"]
-
     def __init__(self, napari_viewer: Viewer, parent: Optional[QWidget] = None) -> None:
         super(IMCWidget, self).__init__(parent)
         self._controller = IMCController(napari_viewer, self)

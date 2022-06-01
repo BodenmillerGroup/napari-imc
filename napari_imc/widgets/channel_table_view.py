@@ -1,6 +1,7 @@
+from typing import Optional
+
 from qtpy.QtCore import QModelIndex
 from qtpy.QtWidgets import QTableView, QWidget
-from typing import Optional
 
 
 class ChannelTableView(QTableView):

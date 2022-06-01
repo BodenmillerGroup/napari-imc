@@ -1,6 +1,7 @@
-from qtpy.QtCore import Qt, QModelIndex, QObject, QPoint, Signal
-from qtpy.QtWidgets import QMenu, QStyle, QTreeView, QWidget
 from typing import Optional
+
+from qtpy.QtCore import QModelIndex, QObject, QPoint, Qt, Signal
+from qtpy.QtWidgets import QMenu, QStyle, QTreeView, QWidget
 
 from ..models import IMCFileModel
 

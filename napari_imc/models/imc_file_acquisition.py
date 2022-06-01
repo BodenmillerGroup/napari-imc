@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List, Optional, Sequence
 
 from .base import IMCFileTreeItem, ModelBase
 

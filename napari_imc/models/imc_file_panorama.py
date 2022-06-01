@@ -1,5 +1,6 @@
+from typing import TYPE_CHECKING, Any, List, Optional
+
 from napari.layers import Image
-from typing import Any, List, Optional, TYPE_CHECKING
 
 from .base import IMCFileTreeItem, ModelBase
 

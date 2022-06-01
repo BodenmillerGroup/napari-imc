@@ -1,14 +1,10 @@
-import numpy as np
-
 from abc import abstractmethod
 from pathlib import Path
 from typing import List, NamedTuple, Tuple, Union
 
-from ..models import (
-    IMCFileModel,
-    IMCFileAcquisitionModel,
-    IMCFilePanoramaModel,
-)
+import numpy as np
+
+from ..models import IMCFileAcquisitionModel, IMCFileModel, IMCFilePanoramaModel
 from ..models.base import IMCFileTreeItem
 
 

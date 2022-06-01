@@ -1,6 +1,7 @@
 from contextlib import contextmanager
-from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex, QObject
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
+from qtpy.QtCore import QAbstractTableModel, QModelIndex, QObject, Qt
 
 if TYPE_CHECKING:
     from ..imc_controller import IMCController

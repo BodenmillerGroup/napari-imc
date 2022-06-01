@@ -1,20 +1,11 @@
 # napari-imc
 
-<a href="https://pypi.org/project/napari-imc/">
-    <img src="https://img.shields.io/pypi/v/napari-imc" alt="PyPI" />
-</a>
-<a href="https://github.com/BodenmillerGroup/napari-imc/blob/main/LICENSE.md">
-    <img src="https://img.shields.io/pypi/l/napari-imc" alt="License" />
-</a>
-<a href="https://www.python.org/">
-    <img src="https://img.shields.io/pypi/pyversions/napari-imc" alt="Python" />
-</a>
-<a href="https://github.com/BodenmillerGroup/napari-imc/issues">
-    <img src="https://img.shields.io/github/issues/BodenmillerGroup/napari-imc" alt="Issues" />
-</a>
-<a href="https://github.com/BodenmillerGroup/napari-imc/pulls">
-    <img src="https://img.shields.io/github/issues-pr/BodenmillerGroup/napari-imc" alt="Pull requests" />
-</a>
+[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-imc)](https://napari-hub.org/plugins/napari-imc)
+[![PyPI](https://img.shields.io/pypi/v/napari-imc.svg?color=green)](https://pypi.org/project/napari-imc)
+[![License](https://img.shields.io/pypi/l/napari-imc.svg?color=green)](https://github.com/BodenmillerGroup/napari-imc/raw/main/LICENSE)
+[![Python Version](https://img.shields.io/pypi/pyversions/napari-imc.svg?color=green)](https://python.org)
+[![Issues](https://img.shields.io/github/issues/BodenmillerGroup/napari-imc)](https://github.com/BodenmillerGroup/napari-imc/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/BodenmillerGroup/napari-imc)](https://github.com/BodenmillerGroup/napari-imc/pulls)
 
 Imaging Mass Cytometry (IMC) file type support for napari
 

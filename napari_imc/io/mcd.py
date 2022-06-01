@@ -1,15 +1,11 @@
-import numpy as np
-
 from pathlib import Path
-from readimc import MCDFile
 from typing import List, Optional, Tuple, Union
 
+import numpy as np
+from readimc import MCDFile
+
 from ..io.base import FileReaderBase, ImageDimensions
-from ..models import (
-    IMCFileModel,
-    IMCFileAcquisitionModel,
-    IMCFilePanoramaModel,
-)
+from ..models import IMCFileAcquisitionModel, IMCFileModel, IMCFilePanoramaModel
 
 
 class McdFileReader(FileReaderBase):

@@ -1,16 +1,16 @@
-import numpy as np
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, List, Optional, Sequence, Tuple, Type, Union
 
+import numpy as np
 from napari import Viewer
 from napari.layers import Image
-from pathlib import Path
-from typing import Any, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 
 from .io import McdFileReader, TxtFileReader
 from .io.base import FileReaderBase
 from .models import (
     ChannelModel,
-    IMCFileModel,
     IMCFileAcquisitionModel,
+    IMCFileModel,
     IMCFilePanoramaModel,
 )
 from .models.base import IMCFileTreeItem

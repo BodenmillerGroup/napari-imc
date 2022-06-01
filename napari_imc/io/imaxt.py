@@ -1,18 +1,14 @@
-import numpy as np
-
-from imageio import imread
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
+import numpy as np
+from imageio import imread
+
 from ..io.base import FileReaderBase, ImageDimensions
-from ..models import (
-    IMCFileModel,
-    IMCFileAcquisitionModel,
-    IMCFilePanoramaModel,
-)
+from ..models import IMCFileAcquisitionModel, IMCFileModel, IMCFilePanoramaModel
 
 try:
-    import zarr
+    import zarr  # type: ignore
 except Exception:
     zarr = None
 

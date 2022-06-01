@@ -1,7 +1,8 @@
-from qtpy.QtCore import Qt, QObject, Signal
+from typing import Optional
+
+from qtpy.QtCore import QObject, Qt, Signal
 from qtpy.QtGui import QColor, qGray
 from qtpy.QtWidgets import QColorDialog, QMenu, QPushButton, QWidget, QWidgetAction
-from typing import Optional
 
 
 class ColorPicker(QPushButton):
