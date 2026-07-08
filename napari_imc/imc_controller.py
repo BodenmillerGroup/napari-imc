@@ -200,7 +200,7 @@ class IMCController(IMCFileTreeItem):
             data,
             colormap=channel.create_colormap(),
             gamma=channel.gamma,
-            interpolation=channel.interpolation,
+            interpolation2d=channel.interpolation,
             contrast_limits=(0, np.amax(data)),  # sets contrast_limits_range
             name=(
                 f"{imc_file_acquisition.imc_file.path.name} "
