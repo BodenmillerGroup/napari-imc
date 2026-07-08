@@ -100,16 +100,12 @@ class ChannelControlsWidget(QWidget):
                     color.alpha() / 255,
                 )
 
-        blending_combo_box_activated = self._blending_combo_box.activated[str]
-
-        @blending_combo_box_activated.connect
+        @self._blending_combo_box.textActivated.connect
         def on_blending_combo_box_activated(text: str):
             for channel in self._controller.selected_channels:
                 channel.blending = text
 
-        interpolation_combo_box_activated = self._interpolation_combo_box.activated[str]
-
-        @interpolation_combo_box_activated.connect
+        @self._interpolation_combo_box.textActivated.connect
         def on_interpolation_combo_box_activated(text: str):
             for channel in self._controller.selected_channels:
                 channel.interpolation = text
