@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.6] - 2026-07-08
+
+Fixed TypeError when using napari versions over 0.6.0 which used the deprecated "interpolation" keyword when calling the viewer.add_image method; updated citation
+
 ## [v0.6.5] - 2022-06-01
 
 npe2 migration
@@ -48,6 +52,7 @@ Updated documentation
 Last release before introducing this changelog
 
 
+[v0.6.6]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.6.5...v0.6.6
 [v0.6.5]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.6.4...v0.6.5
 [v0.6.4]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.6.3...v0.6.4
 [v0.6.3]: https://github.com/BodenmillerGroup/napari-imc/compare/v0.6.2...v0.6.3
