@@ -36,10 +36,26 @@ class IMCController(IMCFileTreeItem):
         self._channels: List[ChannelModel] = []
         self._selected_channels: List[ChannelModel] = []
         self._closed_imc_files_qt_memory_hack: List[IMCFileModel] = []
+        self._global_flip_y_min: Optional[float] = None
+        self._global_flip_y_max: Optional[float] = None
 
     @classmethod
     def is_imc_file(cls, path: Union[str, Path]) -> bool:
         return any(file_reader.accepts(path) for file_reader in cls.FILE_READERS)
+    
+    def _get_globally_flipped_translate(
+    self, dims, data: np.ndarray
+) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+        y_scale = dims.height / data.shape[0]
+        x_scale = dims.width / data.shape[1]
+
+        if self._global_flip_y_min is None or self._global_flip_y_max is None:
+            self._global_flip_y_min = dims.y
+            self._global_flip_y_max = dims.y + dims.height
+
+        translate_y = self._global_flip_y_min + self._global_flip_y_max - dims.y
+
+        return (-y_scale, x_scale), (translate_y, dims.x)
 
     def open_imc_file(self, imc_file_path: Union[str, Path]) -> Optional[IMCFileModel]:
         imc_file_path = Path(imc_file_path).resolve()
@@ -87,6 +103,9 @@ class IMCController(IMCFileTreeItem):
         if dims is None or data is None:
             return None
         new_layer_index = self._get_next_panorama_layer_index()
+
+        scale, translate = self._get_globally_flipped_translate(dims, data)
+
         layer = self._viewer.add_image(
             data,
             name=(
@@ -97,8 +116,8 @@ class IMCController(IMCFileTreeItem):
                 self.PANORAMA_LAYER_TYPE: True,
                 "imc_file_panorama": str(imc_file_panorama),
             },
-            scale=(dims.height / data.shape[0], dims.width / data.shape[1]),
-            translate=(dims.y, dims.x),
+            scale = scale,
+            translate=translate,
             rotate=dims.rotation,
             opacity=0.5,
         )
@@ -196,6 +215,9 @@ class IMCController(IMCFileTreeItem):
         if channel.contrast_limits is None:
             channel.contrast_limits = (0, np.amax(data))
         new_layer_index = self._get_next_acquisition_layer_index()
+
+        scale, translate = self._get_globally_flipped_translate(dims, data)
+
         layer = self._viewer.add_image(
             data,
             colormap=channel.create_colormap(),
@@ -211,8 +233,8 @@ class IMCController(IMCFileTreeItem):
                 "imc_file_acquisition": str(imc_file_acquisition),
                 "channel": str(channel),
             },
-            scale=(dims.height / data.shape[0], dims.width / data.shape[1]),
-            translate=(dims.y, dims.x),
+            scale = scale,
+            translate = translate,
             rotate=dims.rotation,
             opacity=channel.opacity,
             blending=channel.blending,
